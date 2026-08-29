@@ -12,7 +12,9 @@ on:
   schedule:
     - cron: "0 0 15 * *"
   workflow_dispatch:
-permissions: read-all
+  workflow_call:
+permissions:
+  contents: read
 concurrency:
   group: code-quality-verifiers-${{ github.ref }}
   cancel-in-progress: true

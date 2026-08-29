@@ -10,6 +10,7 @@ name: Release with AI Changelog
 # yamllint disable-line rule:truthy
 on:
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: write
 jobs:
