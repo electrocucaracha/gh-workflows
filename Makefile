@@ -1,0 +1,33 @@
+# SPDX-license-identifier: Apache-2.0
+##############################################################################
+# Copyright (c) 2024
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Apache License, Version 2.0
+# which accompanies this distribution, and is available at
+# http://www.apache.org/licenses/LICENSE-2.0
+##############################################################################
+
+DOCKER_CMD ?= $(shell which docker 2> /dev/null || which podman 2> /dev/null || echo docker)
+
+.PHONY: cleanup
+cleanup:
+	rm -rf node_modules
+	rm -rf .tox/ .venv/
+
+.PHONY: lint
+lint: cleanup
+	sudo -E $(DOCKER_CMD) run --rm -v $$(pwd):/tmp/lint \
+	-e RUN_LOCAL=true \
+	-e LINTER_RULES_PATH=/ \
+	ghcr.io/super-linter/super-linter
+
+.PHONY: fmt
+fmt: cleanup
+	command -v shfmt > /dev/null || curl -s "https://i.jpillora.com/mvdan/sh!!?as=shfmt" | bash
+	shfmt -l -w -s -i 4 .
+	command -v yamlfmt > /dev/null || curl -s "https://i.jpillora.com/google/yamlfmt!!" | bash
+	yamlfmt -dstar **/*.{yaml,yml}
+	npm list --depth=0 textlint textlint-rule-terminology >/dev/null 2>&1 || npm install --save-dev textlint textlint-rule-terminology
+	npx --no-install textlint . --fix
+	npm list --depth=0 prettier >/dev/null 2>&1 || npm install --save-dev prettier
+	npx --no-install prettier . --write --ignore-unknown

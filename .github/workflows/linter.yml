@@ -1,0 +1,247 @@
+# SPDX-license-identifier: Apache-2.0
+##############################################################################
+# Copyright (c) 2024
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Apache License, Version 2.0
+# which accompanies this distribution, and is available at
+# http://www.apache.org/licenses/LICENSE-2.0
+##############################################################################
+name: "CI: Lint and Static Checks"
+# yamllint disable-line rule:truthy
+on:
+  push:
+  pull_request:
+  workflow_call:
+    inputs:
+      validate_overrides:
+        description: >-
+          JSON object of VALIDATE_* super-linter env var overrides, e.g. '{"VALIDATE_PYTHON": false, "VALIDATE_JAVASCRIPT_ES": true}'. Merged on top of this workflow's defaults.
+        type: string
+        required: false
+        default: "{}"
+permissions: read-all
+jobs:
+  check-super-linter:
+    name: Run Super-Linter Validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      models: read
+      issues: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Configure linter validations
+        id: linter-config
+        env:
+          VALIDATE_OVERRIDES: ${{ inputs.validate_overrides || '{}' }}
+        run: |
+          set -euo pipefail
+
+          echo "$VALIDATE_OVERRIDES" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
+      - name: Run super-linter validation
+        id: linter-validation
+        uses: super-linter/super-linter@4ce20838b8ab83717e78138c5b3a1407148e0918 # v8.7.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINTER_RULES_PATH: /
+          SAVE_SUPER_LINTER_OUTPUT: true
+          KUBERNETES_KUBECONFORM_OPTIONS: "-ignore-missing-schemas"
+          DEFAULT_BRANCH: ${{ github.head_ref || github.ref_name }}
+      - uses: GrantBirki/git-diff-action@b27608d18e6dd9b31b46ede56a93e045d3881a28 # v3.0.0
+        id: git-diff
+        if: failure()
+      - name: Get failed linter logs
+        id: get-failed-linters
+        if: failure()
+        run: |
+          set -euo pipefail
+
+          OUTPUT_ROOT='./super-linter-output'
+          ERROR_FILES=$(mktemp)
+          JSON_FILES=$(mktemp)
+          trap 'rm -f "$ERROR_FILES" "$JSON_FILES"' EXIT
+
+          if [ -d "$OUTPUT_ROOT" ]; then
+            find "$OUTPUT_ROOT" -type f -name '*.json' -print0 > "$JSON_FILES"
+          fi
+
+          if [ -s "$JSON_FILES" ]; then
+            while IFS= read -r -d '' file; do
+              jq -e 'type == "object" and (.Exitval // 0) != 0' "$file" >/dev/null && \
+                printf '%s\0' "$file" >> "$ERROR_FILES" || true
+            done < "$JSON_FILES"
+          fi
+
+          if [ -s "$ERROR_FILES" ]; then
+            xargs -0 jq -s '.' < "$ERROR_FILES" > linter-errors.json
+
+            # Build a compact, localization-focused summary for agentic analysis.
+            jq -r '
+              [
+                "# Failed Linter Summary",
+                "",
+                (map(select(.Exitval != 0))
+                  | map("- \(.Linter // \"unknown\") | \(.Path // .FilePath // \"unknown-path\") | line \(.Line // .StartLine // \"?\")")
+                  | join("\n")
+                )
+              ]
+              | join("\n")
+            ' linter-errors.json > linter-summary.md
+
+            echo "has-errors=true" >> "$GITHUB_OUTPUT"
+          else
+            echo '[]' > linter-errors.json
+            {
+              printf '# Failed Linter Summary\n\n'
+              printf 'No structured linter errors were found. Raw Super-Linter output follows.\n\n'
+              if [ -d "$OUTPUT_ROOT" ]; then
+                find "$OUTPUT_ROOT" -type f ! -name '*.json' -print -exec sh -c '
+                  printf "\\n### %s\\n\\n" "$1"
+                  sed -n "1,240p" "$1"
+                ' _ {} \;
+              else
+                printf 'The super-linter output directory was not created. Inspect the workflow log for the failing step.\n'
+              fi
+            } > linter-summary.md
+            if [ -s linter-summary.md ]; then
+              echo "has-errors=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "has-errors=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+          {
+            cat linter-summary.md
+            printf '\n## Structured Diagnostics\n```json\n'
+            cat linter-errors.json
+            printf '\n```\n'
+          } > linter-prompt.md
+      - uses: actions/ai-inference@2c43c91ae16266ca159d311430343c67a5ffa222 # v3
+        id: ai-linter-analysis
+        if: failure() && steps.get-failed-linters.outputs.has-errors == 'true'
+        with:
+          model: mistral-ai/Ministral-3B
+          input: |
+            diff: ${{ steps.git-diff.outputs.raw-diff }}
+            linter_summary: available in linter-summary.md
+          prompt-file: ./linter-prompt.md
+          system-prompt: |
+            You are an expert software engineer who specializes in diagnosing and fixing software build and runtime failures.
+            Provide a concise, evidence-based diagnosis, concrete fixes, a ready-to-run agent prompt, and a durable safeguard against recurrence.
+
+            Task: Analyze the supplied Super-Linter diagnostics and cross-reference them with the code diff to determine the root cause of the failure.
+            {{ diff }}
+
+            The prompt file contains a JSON array of structured diagnostics. The companion linter-summary.md file may contain a human summary or raw output when the linter did not emit structured JSON.
+
+            Response format:
+            ## Diagnosis
+            State the most likely root cause and cite the linter, file, line, and message.
+
+            ## Fix
+            Give the smallest concrete fix. Include a unified diff only when the change is unambiguous.
+
+            ## Verification
+            Name the command or workflow check that should confirm the fix.
+
+            ## Copilot Prompt
+            Emit a single fenced ```text block containing a self-contained, copy-paste prompt for a coding agent (GitHub Copilot) running inside this repository.
+            The prompt must name the exact files and line numbers to edit, restate the linter rule IDs being violated, describe the expected end state, and end with the verification command. Do not reference this issue or any external context the agent cannot read.
+
+            ## Prevention
+            Recommend one durable safeguard so this class of failure does not recur, chosen from: a linter config change (with the file path and setting), a pre-commit hook entry, an editorconfig or formatter rule, or a workflow guard. Give the concrete snippet and where it goes. If the failure was a one-off with no reasonable safeguard, say so explicitly instead of inventing one.
+
+            Context strategy (agent-ready):
+            - Prioritize localization cues: identify exact files, line numbers, symbols, and changed hunks tied to failures.
+            - Prioritize repair direction: propose one primary fix path and one minimal fallback patch.
+            - De-prioritize generic narrative that does not narrow the fix search space.
+
+            If the evidence is insufficient, say exactly what is missing and point to the relevant workflow log section instead of inventing a cause.
+          # jscpd:ignore-start
+      - name: Get the entire analysis output
+        id: get-analysis-output
+        if: failure() && steps.get-failed-linters.outputs.has-errors == 'true'
+        env:
+          RESPONSE_FILE: ${{ steps.ai-linter-analysis.outputs.response-file }}
+        run: |
+          DELIM="EOF_$(uuidgen)"
+          {
+            printf "response<<%s\n" "$DELIM"
+            cat "$RESPONSE_FILE"
+            printf "\n%s\n" "$DELIM"
+          } >> "$GITHUB_OUTPUT"
+        # jscpd:ignore-end
+      - name: Build dual-mode issue report
+        id: build-issue-report
+        if: failure()
+        env:
+          AI_RESPONSE: ${{ steps.get-analysis-output.outputs.response || '' }}
+          HAS_ERRORS: ${{ steps.get-failed-linters.outputs.has-errors || 'false' }}
+        run: |
+          set -euo pipefail
+
+          # Create agent-focused machine JSON payload with stable keys.
+          if [ "$HAS_ERRORS" = "true" ] && [ -f linter-errors.json ]; then
+            jq -n --slurpfile errs linter-errors.json --arg ai "$AI_RESPONSE" '
+              {
+                schema_version: "1.0",
+                has_structured_errors: (($errs[0] | length) > 0),
+                failing_count: ($errs[0] | length),
+                failing_linters: ($errs[0] | map(.Linter // "unknown") | unique | sort),
+                files: ($errs[0] | map(.Path // .FilePath // "unknown-path") | unique | sort),
+                entries: ($errs[0] | map({
+                  linter: (.Linter // "unknown"),
+                  file: (.Path // .FilePath // "unknown-path"),
+                  line: (.Line // .StartLine // null),
+                  column: (.Column // .StartColumn // null),
+                  message: (.Message // .Description // "")
+                })),
+                ai_analysis: ($ai // "")
+              }
+            ' > machine-report.json
+          else
+            jq -n --arg ai "$AI_RESPONSE" '
+              {
+                schema_version: "1.0",
+                has_structured_errors: false,
+                failing_count: 0,
+                failing_linters: [],
+                files: [],
+                entries: [],
+                ai_analysis: ($ai // "")
+              }
+            ' > machine-report.json
+          fi
+
+          # Create human summary.
+          if [ "$HAS_ERRORS" = "true" ] && [ -f linter-summary.md ]; then
+            cp linter-summary.md human-summary.md
+          else
+            printf '# Failed Linter Summary\n\nNo structured failing linter entries were detected.\n' > human-summary.md
+          fi
+
+          DELIM="EOF_$(uuidgen)"
+          {
+            printf "report<<%s\n" "$DELIM"
+            printf '## Human Summary\n'
+            cat human-summary.md
+            printf '\n## Agent Data (JSON)\n```json\n'
+            cat machine-report.json
+            printf '```\n'
+            printf "%s\n" "$DELIM"
+          } >> "$GITHUB_OUTPUT"
+      - uses: jayqi/failed-build-issue-action@1a893bbf43ef1c2a8705e2b115cd4f0fe3c5649b # v1.2.0
+        if: failure()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          title-template: "super-linter GitHub action has failed"
+          label-name: super-linter-issue
+          body-template: |
+            The linter step has failed. Please check for new major versions and update manually.
+
+            Please check the [logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
+
+            ${{ steps.build-issue-report.outputs.report }}
