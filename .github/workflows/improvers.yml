@@ -159,6 +159,7 @@ jobs:
           # jscpd:ignore-end
           agent: ${{ matrix.agent }}
           prompt: ${{ matrix.prompt }}
+          fail-on-error: true
       - name: Collect usage metrics
         if: always()
         run: |
