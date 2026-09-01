@@ -51,6 +51,7 @@ jobs:
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
     permissions:
+      copilot-requests: write
       contents: write
       pull-requests: write
     strategy:
@@ -146,17 +147,8 @@ jobs:
           denied-tools: "shell(rm:*),shell(sudo:*),shell(chown:*),shell(chmod:777),shell(dd:*)"
           allow-all-paths: true
           allow-all-urls: true
-          repo-token: ${{ github.actor == 'electrocucaracha[bot]' && secrets.COPILOT_TOKEN || github.token }}
           mcp-config: |
             {
-              "mcpServers": {
-                "github-mcp-server": {
-                  "type": "http",
-                  "url": "https://api.githubcopilot.com/mcp/",
-                  "headers": {
-                    "Authorization": "Bearer ${{ secrets.COPILOT_TOKEN }}"
-                  }
-                },
                 "graphify": {
                   "command": "graphify",
                   "args": [".", "--mcp"]
