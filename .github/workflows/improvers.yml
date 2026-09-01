@@ -6,7 +6,7 @@
 # which accompanies this distribution, and is available at
 # http://www.apache.org/licenses/LICENSE-2.0
 ##############################################################################
-name: "Maintenance: Go Quality Improvements"
+name: "Maintenance: Code Base Quality Improvements"
 # yamllint disable-line rule:truthy
 on:
   schedule:
@@ -33,14 +33,12 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.45.0/install.sh | sh
           rtk --version
           rtk init --global --copilot
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: false
       - name: Generate repository map with Graphify
         run: |
-          python3 -m pip install --user --upgrade pip
-          python3 -m pip install --user graphifyy
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/.local/bin:$PATH"
-          graphify --version
-          graphify . --no-viz
+          uvx --from graphifyy graphify . --no-viz --code-only
       - name: Upload repository map
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
