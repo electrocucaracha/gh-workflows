@@ -51,7 +51,7 @@ jobs:
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
     permissions:
-      copilot-requests: write
+      copilot-requests: none
       contents: write
       pull-requests: write
     strategy:
