@@ -136,23 +136,6 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Download repository map
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: graphify-out
-          path: graphify-out
-      - name: Install rtk token saver
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.45.0/install.sh | sh
-          rtk --version
-          rtk init --global --copilot
-      - name: Install Graphify MCP server
-        run: |
-          python3 -m pip install --user --upgrade pip
-          python3 -m pip install --user graphifyy
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/.local/bin:$PATH"
-          graphify --version
       - name: Run Copilot CLI
         uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
         env:
