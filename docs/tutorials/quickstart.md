@@ -139,7 +139,7 @@ the suppression-review task uses both commands.
 ## 6. Run and verify
 
 1. Commit and push the workflow and both agent files to the default branch.
-1. Open **Actions** > **Maintenance: Code Base Quality Improvements**.
+1. Open **Actions** > **Maintenance: codebase Quality Improvements**.
 1. Select **Run workflow**.
 1. Wait for the three matrix jobs to finish.
 1. Review the pull requests created from `tech-debt-reduction`,

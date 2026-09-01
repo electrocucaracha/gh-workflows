@@ -8,26 +8,26 @@ nav_order: 1
 
 ## Reusable workflow
 
-| Property | Value |
-| --- | --- |
-| Path | `.github/workflows/improvers.yml` |
-| Reusable entry point | `workflow_call` |
-| Scheduled entry point | Day 15 of each month at 00:00 UTC |
-| Manual entry point | `workflow_dispatch` |
-| Runner | `ubuntu-latest` |
-| Concurrency | One active run per Git ref |
-| Required secret | `COPILOT_TOKEN` |
+| Property                 | Value                                     |
+| ------------------------ | ----------------------------------------- |
+| Path                     | `.github/workflows/improvers.yml`         |
+| Reusable entry point     | `workflow_call`                           |
+| Scheduled entry point    | Day 15 of each month at 00:00 UTC         |
+| Manual entry point       | `workflow_dispatch`                       |
+| Runner                   | `ubuntu-latest`                           |
+| Concurrency              | One active run per Git ref                |
+| Required secret          | `COPILOT_TOKEN`                           |
 | Required job permissions | `contents: write`, `pull-requests: write` |
 
 ## Improvement jobs
 
 The matrix runs all entries independently because `fail-fast` is disabled.
 
-| Matrix ID | Agent | Branch | Pull request title | Validation |
-| --- | --- | --- | --- | --- |
-| `reduce-tech-debt` | `janitor` | `tech-debt-reduction` | `chore: reduce technical debt` | `make test` |
-| `remove-ignored-rules` | `janitor` | `remove-ignored-rules` | `chore: remove unnecessary rule suppressions` | `make test` and `make lint` |
-| `improve-code-coverage` | `qa-subagent` | `increase-code-coverage` | `test: increase code coverage` | `make test` |
+| Matrix ID               | Agent         | Branch                   | Pull request title                            | Validation                  |
+| ----------------------- | ------------- | ------------------------ | --------------------------------------------- | --------------------------- |
+| `reduce-tech-debt`      | `janitor`     | `tech-debt-reduction`    | `chore: reduce technical debt`                | `make test`                 |
+| `remove-ignored-rules`  | `janitor`     | `remove-ignored-rules`   | `chore: remove unnecessary rule suppressions` | `make test` and `make lint` |
+| `improve-code-coverage` | `qa-subagent` | `increase-code-coverage` | `test: increase code coverage`                | `make test`                 |
 
 ## Setup performed on the runner
 

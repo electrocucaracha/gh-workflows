@@ -39,10 +39,10 @@ The `secrets: inherit` setting makes the caller's `COPILOT_TOKEN` available to t
 
 Keep these files in the consuming repository:
 
-| File | Used by | Purpose |
-| --- | --- | --- |
-| `.github/agents/janitor.agent.md` | `reduce-tech-debt`, `remove-ignored-rules` | Removes dead code and complexity, and resolves suppressions. |
-| `.github/agents/qa-subagent.agent.md` | `improve-code-coverage` | Finds coverage gaps and adds behavior-focused tests. |
+| File                                  | Used by                                    | Purpose                                                      |
+| ------------------------------------- | ------------------------------------------ | ------------------------------------------------------------ |
+| `.github/agents/janitor.agent.md`     | `reduce-tech-debt`, `remove-ignored-rules` | Removes dead code and complexity, and resolves suppressions. |
+| `.github/agents/qa-subagent.agent.md` | `improve-code-coverage`                    | Finds coverage gaps and adds behavior-focused tests.         |
 
 The agent names in their frontmatter must continue to resolve from the matrix values in the reusable workflow.
 Copy both files again when their upstream definitions change.
