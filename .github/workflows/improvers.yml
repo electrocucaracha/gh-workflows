@@ -149,6 +149,7 @@ jobs:
           allow-all-urls: true
           mcp-config: |
             {
+              "mcpServers": {
                 "graphify": {
                   "command": "graphify",
                   "args": [".", "--mcp"]
