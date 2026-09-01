@@ -19,35 +19,8 @@ concurrency:
   group: code-quality-verifiers-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  prepare:
-    name: Prepare Repository Map
-    if: github.event_name != 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Install rtk token saver
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.45.0/install.sh | sh
-          rtk --version
-          rtk init --global --copilot
-      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
-        with:
-          enable-cache: false
-      - name: Generate repository map with Graphify
-        run: |
-          uvx --from graphifyy graphify . --no-viz --code-only
-      - name: Upload repository map
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: graphify-out
-          path: graphify-out/
-          if-no-files-found: error
   run-improvers:
     name: ${{ matrix.name }}
-    needs: prepare
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
     permissions:
@@ -131,11 +104,23 @@ jobs:
                    --head increase-code-coverage
                  - Keep the diff focused and reviewable.
     steps:
-      # jscpd:ignore-start
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Install rtk token saver
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.45.0/install.sh | sh
+          rtk --version
+          rtk init --global --copilot
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: false
+      - name: Generate repository map with Graphify
+        run: |
+          uv tool install graphifyy
+          graphify --version
+          graphify . --no-viz --code-only
       - name: Run Copilot CLI
         uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
         env:
@@ -155,7 +140,6 @@ jobs:
                 }
               }
             }
-          # jscpd:ignore-end
           agent: ${{ matrix.agent }}
           prompt: ${{ matrix.prompt }}
           fail-on-error: true
