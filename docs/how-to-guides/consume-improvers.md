@@ -8,6 +8,8 @@ nav_order: 1
 
 Use a caller workflow when you want the upstream maintenance logic and prompts to stay centrally managed.
 
+![Improvers workflow execution flow](../assets/improvers-workflow.png)
+
 ## Add the minimal caller
 
 Create `.github/workflows/improvers.yml` in the consuming repository:

@@ -12,24 +12,7 @@ Each consuming repository owns its trigger, Copilot credential, custom agent fil
 
 ## Execution flow
 
-```text
-Consuming repository
-  |
-  | schedule or manual dispatch
-  v
-Caller workflow
-  |
-  | reusable workflow reference + inherited secrets
-  v
-Shared improvers workflow
-  |
-  +-- checkout consuming repository
-  +-- build Graphify repository map
-  +-- run janitor task ----------------> branch + pull request
-  +-- run suppression-review task -----> branch + pull request
-  +-- run QA coverage task ------------> branch + pull request
-  +-- publish usage metrics
-```
+![Improvers workflow execution flow](../assets/improvers-workflow.png)
 
 The reusable workflow runs in the context of the caller.
 GitHub resolves the workflow definition from `electrocucaracha/gh-workflows`,

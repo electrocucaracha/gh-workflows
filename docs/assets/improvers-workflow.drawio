@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram name="Improvers Workflow">
+    <mxGraphModel>
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Start: Consuming Repository -->
+        <mxCell id="2" value="Consuming Repository"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1"
+          vertex="1" parent="1">
+          <mxGeometry x="340" y="20" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Trigger -->
+        <mxCell id="3" value="Schedule or&#xa;Manual Dispatch"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11"
+          vertex="1" parent="1">
+          <mxGeometry x="340" y="110" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Repository -> Trigger -->
+        <mxCell id="4"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+          edge="1" parent="1" source="2" target="3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Caller Workflow -->
+        <mxCell id="5" value="Caller Workflow"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1"
+          vertex="1" parent="1">
+          <mxGeometry x="340" y="210" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Trigger -> Caller -->
+        <mxCell id="6"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+          edge="1" parent="1" source="3" target="5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Input: Reusable workflow ref -->
+        <mxCell id="7" value="Reusable workflow reference +&#xa;inherited secrets"
+          style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10"
+          vertex="1" parent="1">
+          <mxGeometry x="540" y="215" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Caller -> Input (dashed) -->
+        <mxCell id="8"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1"
+          edge="1" parent="1" source="5" target="7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Shared Improvers Workflow (container) -->
+        <mxCell id="9" value="Shared Improvers Workflow"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;dashed=1"
+          vertex="1" parent="1">
+          <mxGeometry x="220" y="320" width="520" height="480" as="geometry" />
+        </mxCell>
+
+        <!-- Tasks inside container -->
+
+        <!-- Task 1: Checkout -->
+        <mxCell id="10" value="Checkout consuming&#xa;repository"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
+          vertex="1" parent="1">
+          <mxGeometry x="250" y="350" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Task 2: Graphify -->
+        <mxCell id="11" value="Build Graphify&#xa;repository map"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
+          vertex="1" parent="1">
+          <mxGeometry x="400" y="350" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Task 3: Janitor -->
+        <mxCell id="12" value="Run janitor task"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
+          vertex="1" parent="1">
+          <mxGeometry x="250" y="450" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Task 4: Suppression -->
+        <mxCell id="13" value="Run suppression-&#xa;review task"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
+          vertex="1" parent="1">
+          <mxGeometry x="400" y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Task 5: QA -->
+        <mxCell id="14" value="Run QA coverage&#xa;task"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
+          vertex="1" parent="1">
+          <mxGeometry x="550" y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Task 6: Publish -->
+        <mxCell id="15" value="Publish usage&#xa;metrics"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
+          vertex="1" parent="1">
+          <mxGeometry x="400" y="560" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Output: Branch + PR -->
+        <mxCell id="16" value="Branch +&#xa;Pull Request"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9"
+          vertex="1" parent="1">
+          <mxGeometry x="800" y="350" width="90" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="17" value="Branch +&#xa;Pull Request"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9"
+          vertex="1" parent="1">
+          <mxGeometry x="800" y="460" width="90" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="18" value="Branch +&#xa;Pull Request"
+          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9"
+          vertex="1" parent="1">
+          <mxGeometry x="800" y="570" width="90" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows from tasks to outputs -->
+        <mxCell id="19"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+          edge="1" parent="1" source="12" target="16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="20"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+          edge="1" parent="1" source="13" target="17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="21"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+          edge="1" parent="1" source="14" target="18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Workflow -> Tasks -->
+        <mxCell id="22"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+          edge="1" parent="1" source="5" target="10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="420" y="280" />
+              <mxPoint x="340" y="280" />
+              <mxPoint x="340" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
