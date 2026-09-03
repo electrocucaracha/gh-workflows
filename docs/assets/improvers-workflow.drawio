@@ -6,18 +6,18 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <!-- Start: Consuming Repository -->
+        <!-- Consuming Repository -->
         <mxCell id="2" value="Consuming Repository"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1"
           vertex="1" parent="1">
-          <mxGeometry x="340" y="20" width="160" height="50" as="geometry" />
+          <mxGeometry x="340" y="40" width="160" height="60" as="geometry" />
         </mxCell>
 
         <!-- Trigger -->
         <mxCell id="3" value="Schedule or&#xa;Manual Dispatch"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11"
           vertex="1" parent="1">
-          <mxGeometry x="340" y="110" width="160" height="60" as="geometry" />
+          <mxGeometry x="340" y="170" width="160" height="70" as="geometry" />
         </mxCell>
 
         <!-- Arrow: Repository -> Trigger -->
@@ -31,7 +31,7 @@
         <mxCell id="5" value="Caller Workflow"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1"
           vertex="1" parent="1">
-          <mxGeometry x="340" y="210" width="160" height="50" as="geometry" />
+          <mxGeometry x="340" y="310" width="160" height="70" as="geometry" />
         </mxCell>
 
         <!-- Arrow: Trigger -> Caller -->
@@ -45,114 +45,143 @@
         <mxCell id="7" value="Reusable workflow reference +&#xa;inherited secrets"
           style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10"
           vertex="1" parent="1">
-          <mxGeometry x="540" y="215" width="140" height="60" as="geometry" />
+          <mxGeometry x="600" y="315" width="200" height="70" as="geometry" />
         </mxCell>
 
         <!-- Arrow: Caller -> Input (dashed) -->
         <mxCell id="8"
-          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;"
           edge="1" parent="1" source="5" target="7">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
         <!-- Shared Improvers Workflow (container) -->
         <mxCell id="9" value="Shared Improvers Workflow"
-          style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;dashed=1"
+          style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;dashed=1;spacingTop=10"
           vertex="1" parent="1">
-          <mxGeometry x="220" y="320" width="520" height="480" as="geometry" />
+          <mxGeometry x="140" y="450" width="710" height="420" as="geometry" />
         </mxCell>
 
-        <!-- Tasks inside container -->
-
-        <!-- Task 1: Checkout -->
+        <!-- Task: Checkout -->
         <mxCell id="10" value="Checkout consuming&#xa;repository"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
           vertex="1" parent="1">
-          <mxGeometry x="250" y="350" width="120" height="60" as="geometry" />
+          <mxGeometry x="210" y="500" width="140" height="70" as="geometry" />
         </mxCell>
 
-        <!-- Task 2: Graphify -->
+        <!-- Task: Graphify -->
         <mxCell id="11" value="Build Graphify&#xa;repository map"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
           vertex="1" parent="1">
-          <mxGeometry x="400" y="350" width="120" height="60" as="geometry" />
+          <mxGeometry x="410" y="500" width="140" height="70" as="geometry" />
         </mxCell>
 
-        <!-- Task 3: Janitor -->
+        <!-- Arrow: Checkout -> Graphify -->
+        <mxCell id="23"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;"
+          edge="1" parent="1" source="10" target="11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Task: Janitor -->
         <mxCell id="12" value="Run janitor task"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
           vertex="1" parent="1">
-          <mxGeometry x="250" y="450" width="120" height="50" as="geometry" />
+          <mxGeometry x="170" y="650" width="140" height="70" as="geometry" />
         </mxCell>
 
-        <!-- Task 4: Suppression -->
+        <!-- Task: Suppression -->
         <mxCell id="13" value="Run suppression-&#xa;review task"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
           vertex="1" parent="1">
-          <mxGeometry x="400" y="450" width="120" height="60" as="geometry" />
+          <mxGeometry x="330" y="650" width="140" height="70" as="geometry" />
         </mxCell>
 
-        <!-- Task 5: QA -->
+        <!-- Task: QA -->
         <mxCell id="14" value="Run QA coverage&#xa;task"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
           vertex="1" parent="1">
-          <mxGeometry x="550" y="450" width="120" height="60" as="geometry" />
+          <mxGeometry x="490" y="650" width="140" height="70" as="geometry" />
         </mxCell>
 
-        <!-- Task 6: Publish -->
+        <!-- Task: Publish -->
         <mxCell id="15" value="Publish usage&#xa;metrics"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10"
           vertex="1" parent="1">
-          <mxGeometry x="400" y="560" width="120" height="60" as="geometry" />
+          <mxGeometry x="650" y="650" width="140" height="70" as="geometry" />
         </mxCell>
 
-        <!-- Output: Branch + PR -->
+        <!-- Arrows: Graphify fans out to the four tasks -->
+        <mxCell id="24"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;"
+          edge="1" parent="1" source="11" target="12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="25"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;"
+          edge="1" parent="1" source="11" target="13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="26"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;"
+          edge="1" parent="1" source="11" target="14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="27"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;"
+          edge="1" parent="1" source="11" target="15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Output: Branch + PR per task -->
         <mxCell id="16" value="Branch +&#xa;Pull Request"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9"
           vertex="1" parent="1">
-          <mxGeometry x="800" y="350" width="90" height="60" as="geometry" />
+          <mxGeometry x="170" y="800" width="140" height="70" as="geometry" />
         </mxCell>
 
         <mxCell id="17" value="Branch +&#xa;Pull Request"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9"
           vertex="1" parent="1">
-          <mxGeometry x="800" y="460" width="90" height="60" as="geometry" />
+          <mxGeometry x="330" y="800" width="140" height="70" as="geometry" />
         </mxCell>
 
         <mxCell id="18" value="Branch +&#xa;Pull Request"
           style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9"
           vertex="1" parent="1">
-          <mxGeometry x="800" y="570" width="90" height="60" as="geometry" />
+          <mxGeometry x="490" y="800" width="140" height="70" as="geometry" />
         </mxCell>
 
         <!-- Arrows from tasks to outputs -->
         <mxCell id="19"
-          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;"
           edge="1" parent="1" source="12" target="16">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
         <mxCell id="20"
-          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;"
           edge="1" parent="1" source="13" target="17">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
         <mxCell id="21"
-          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;"
           edge="1" parent="1" source="14" target="18">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- Arrow: Workflow -> Tasks -->
+        <!-- Arrow: Caller -> Checkout (into the container) -->
         <mxCell id="22"
-          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;"
+          style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;"
           edge="1" parent="1" source="5" target="10">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="420" y="280" />
-              <mxPoint x="340" y="280" />
-              <mxPoint x="340" y="330" />
+              <mxPoint x="420" y="420" />
+              <mxPoint x="280" y="420" />
             </Array>
           </mxGeometry>
         </mxCell>
