@@ -47,10 +47,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LINTER_RULES_PATH: /
           SAVE_SUPER_LINTER_OUTPUT: true
-          SAVE_SUPER_LINTER_SUMMARY: true
-          ENABLE_GITHUB_ACTIONS_STEP_SUMMARY: true
-          CREATE_LOG_FILE: true
-          REMOVE_ANSI_COLOR_CODES_FROM_OUTPUT: true
           KUBERNETES_KUBECONFORM_OPTIONS: "-ignore-missing-schemas"
           DEFAULT_BRANCH: ${{ github.head_ref || github.ref_name }}
       - uses: GrantBirki/git-diff-action@b27608d18e6dd9b31b46ede56a93e045d3881a28 # v3.0.0
@@ -63,61 +59,57 @@ jobs:
           set -euo pipefail
 
           OUTPUT_ROOT='./super-linter-output'
-          OUTPUT_DIR="$OUTPUT_ROOT/super-linter"
-          ERROR_COUNT=0
-          : > linter-errors.jsonl
+          ERROR_FILES=$(mktemp)
+          JSON_FILES=$(mktemp)
+          trap 'rm -f "$ERROR_FILES" "$JSON_FILES"' EXIT
 
-          if [ -d "$OUTPUT_DIR" ]; then
-            while IFS= read -r exit_file; do
-              linter=${exit_file##*command-exit-code-}
-              exit_code=$(tr -d '[:space:]' < "$exit_file")
-              stdout_file="$OUTPUT_DIR/super-linter-parallel-stdout-$linter"
-              stderr_file="$OUTPUT_DIR/super-linter-parallel-stderr-$linter"
-
-              if [ "$exit_code" != "0" ]; then
-                stdout=$( [ -f "$stdout_file" ] && sed -n '1,400p' "$stdout_file" || true )
-                stderr=$( [ -f "$stderr_file" ] && sed -n '1,400p' "$stderr_file" || true )
-                jq -n \
-                  --arg linter "$linter" \
-                  --arg exit_code "$exit_code" \
-                  --arg stdout "$stdout" \
-                  --arg stderr "$stderr" \
-                  '{linter: $linter, exit_code: ($exit_code | tonumber? // null), stdout: $stdout, stderr: $stderr}' \
-                  >> linter-errors.jsonl
-                ERROR_COUNT=$((ERROR_COUNT + 1))
-              fi
-            done < <(find "$OUTPUT_DIR" -type f -name 'super-linter-parallel-command-exit-code-*' -print)
+          if [ -d "$OUTPUT_ROOT" ]; then
+            find "$OUTPUT_ROOT" -type f -name '*.json' -print0 > "$JSON_FILES"
           fi
 
-          if [ "$ERROR_COUNT" -gt 0 ]; then
-            jq -s '.' linter-errors.jsonl > linter-errors.json
-          else
-            echo '[]' > linter-errors.json
+          if [ -s "$JSON_FILES" ]; then
+            while IFS= read -r -d '' file; do
+              jq -e 'type == "object" and (.Exitval // 0) != 0' "$file" >/dev/null && \
+                printf '%s\0' "$file" >> "$ERROR_FILES" || true
+            done < "$JSON_FILES"
           fi
 
-          {
-            printf '# Failed Linter Summary\n\n'
-            if [ "$ERROR_COUNT" -gt 0 ]; then
-              jq -r '.[] | "## \(.linter) (exit code \(.exit_code // "unknown"))\n\n### Standard output\n```text\n\(.stdout // "(empty)")\n```\n\n### Standard error\n```text\n\(.stderr // "(empty)")\n```\n"' linter-errors.json
-            else
-              printf 'No per-linter exit-code files were found. The complete Super-Linter log follows.\n\n'
-            fi
+          if [ -s "$ERROR_FILES" ]; then
+            xargs -0 jq -s '.' < "$ERROR_FILES" > linter-errors.json
 
-            if [ -f "$OUTPUT_ROOT/super-linter-summary.md" ]; then
-              printf '\n## Super-Linter Summary\n\n'
-              sed -n '1,240p' "$OUTPUT_ROOT/super-linter-summary.md"
-            fi
-            if [ -f ./super-linter.log ]; then
-              printf '\n## Super-Linter Log\n\n```text\n'
-              sed -n '1,400p' ./super-linter.log
-              printf '\n```\n'
-            fi
-          } > linter-summary.md
+            # Build a compact, localization-focused summary for agentic analysis.
+            jq -r '
+              [
+                "# Failed Linter Summary",
+                "",
+                (map(select(.Exitval != 0))
+                  | map("- \(.Linter // \"unknown\") | \(.Path // .FilePath // \"unknown-path\") | line \(.Line // .StartLine // \"?\")")
+                  | join("\n")
+                )
+              ]
+              | join("\n")
+            ' linter-errors.json > linter-summary.md
 
-          if [ -s linter-summary.md ]; then
             echo "has-errors=true" >> "$GITHUB_OUTPUT"
           else
-            echo "has-errors=false" >> "$GITHUB_OUTPUT"
+            echo '[]' > linter-errors.json
+            {
+              printf '# Failed Linter Summary\n\n'
+              printf 'No structured linter errors were found. Raw Super-Linter output follows.\n\n'
+              if [ -d "$OUTPUT_ROOT" ]; then
+                find "$OUTPUT_ROOT" -type f ! -name '*.json' -print -exec sh -c '
+                  printf "\\n### %s\\n\\n" "$1"
+                  sed -n "1,240p" "$1" 2>/dev/null || printf "(unreadable: permission denied)\\n"
+                ' _ {} \; || true
+              else
+                printf 'The super-linter output directory was not created. Inspect the workflow log for the failing step.\n'
+              fi
+            } > linter-summary.md
+            if [ -s linter-summary.md ]; then
+              echo "has-errors=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "has-errors=false" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
           {
