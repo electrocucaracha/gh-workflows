@@ -12,6 +12,7 @@ Use these when the basic setup is already familiar.
 ## Available how-to guides
 
 - [Consume and customize the improvers workflow](consume-improvers.md)
+- [Consume the linter workflow](consume-linter.md)
 
 ## Next
 
