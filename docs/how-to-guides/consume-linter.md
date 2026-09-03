@@ -35,7 +35,7 @@ jobs:
       models: read
       issues: write
     with:
-      validate_overrides: '{}'
+      validate_overrides: "{}"
 ```
 
 The `workflow_call` entry point is invoked by the caller's job.
