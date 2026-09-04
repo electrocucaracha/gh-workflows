@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.0] - 2026-09-04
+
+### Removed
+
+- Simplified the shared workflow documentation by clarifying the recommended secrets inheritance usage through the removal of an unnecessary example that could cause confusion about explicit inheritance requirements. [13425cea](https://github.com/electrocucaracha/gh-workflows/commit/13425cea26a65ca6969b8c989a3b0073f2122fe8)
+
+## [5.6.0] - 2026-09-04
+
+### Added
+
+- Enabled explicit authentication for reusable workflows by requiring the WORKFLOW_TOKEN secret in the workflow_call configuration, thereby improving security and preventing accidental execution without proper credentials. [5bee7510](https://github.com/electrocucaracha/gh-workflows/commit/5bee7510aa5842c2d36f269bfdc7f010ad0a38c1)
+
+## [5.5.0] - 2026-09-04
+
+### Added
+
+- Enabled detailed changelog entries for versions 5.1.0 to 5.4.3, including summaries of new features, improvements, and fixes, thereby improving release transparency and helping users track project evolution. [028e21e2](https://github.com/electrocucaracha/gh-workflows/commit/028e21e27a63263162f59a7c607d51e2d026412d)
+
 ## [5.4.3] - 2026-09-04
 
 ### Changed
