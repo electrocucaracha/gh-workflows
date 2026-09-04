@@ -1,6 +1,16 @@
 # GitHub Workflows
 
+<!-- markdown-link-check-disable-next-line -->
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![GitHub Super-Linter](https://github.com/electrocucaracha/gh-workflows-msg/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/marketplace/actions/super-linter)
+
+<!-- markdown-link-check-disable-next-line -->
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![visitors](https://visitor-badge.laobi.icu/badge?page_id=electrocucaracha.gh-workflows-msg)
+[![Scc Code Badge](https://sloc.xyz/github/electrocucaracha/gh-workflows-msg?category=code)](https://github.com/boyter/scc/)
+[![Scc COCOMO Badge](https://sloc.xyz/github/electrocucaracha/gh-workflows-msg?category=cocomo)](https://github.com/boyter/scc/)
 
 ## Overview
 

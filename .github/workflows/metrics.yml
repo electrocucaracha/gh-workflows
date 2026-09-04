@@ -1,0 +1,32 @@
+# SPDX-license-identifier: Apache-2.0
+##############################################################################
+# Copyright (c) 2026
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Apache License, Version 2.0
+# which accompanies this distribution, and is available at
+# http://www.apache.org/licenses/LICENSE-2.0
+##############################################################################
+name: Metrics
+# yamllint disable-line rule:truthy
+on:
+  push:
+  pull_request:
+permissions: read-all
+jobs:
+  get-sloc:
+    name: Count Lines of Code
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Setup Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: ">=1.20.0"
+      - name: Install dependencies
+        run: go install github.com/boyter/scc/v3@latest
+      - name: Run scc tool
+        run: scc --format wide
