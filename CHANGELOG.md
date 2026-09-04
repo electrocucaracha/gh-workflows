@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.3.3] - 2026-09-04
+
+### Changed
+
+- The readme documentation now uses bold text to highlight the benefits of centralizing GitHub workflows, improving readability and emphasizing key advantages. [727595f9](https://github.com/electrocucaracha/gh-workflows/commit/727595f933bacf99a130782687f610ebd0e2c6a6)
+
+## [6.3.2] - 2026-09-04
+
+### Changed
+
+- Enabled the GitHub linter workflow to run reliably with AI linter analysis by installing required tools only when necessary. [5c23024d](https://github.com/electrocucaracha/gh-workflows/commit/5c23024d318c6235637c63f83f7881fb1ac86955)
+
+## [6.3.1] - 2026-09-04
+
+### Changed
+
+- The readme was modernized to promote best practices, simplify maintenance, and improve governance by emphasizing the purpose and benefits of using centralized, reusable GitHub Actions workflows. [39f90eba](https://github.com/electrocucaracha/gh-workflows/commit/39f90eba473f853248afa456a030271da5f786bb)
+
+## [6.3.0] - 2026-09-04
+
+### Added
+
+- Enabled release transparency by providing a comprehensive project history through detailed changelog entries for versions 6.1.0–6.2.2, summarizing new features, fixes, and documentation improvements. [5c3faf51](https://github.com/electrocucaracha/gh-workflows/commit/5c3faf51419b0180a329842e4d1734d990614ff2)
+
 ## [6.2.2] - 2026-09-04
 
 ### Changed
