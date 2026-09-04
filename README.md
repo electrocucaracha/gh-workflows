@@ -2,22 +2,13 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-## What you can do
+## Overview
 
-Use the workflows in this repository to add consistent automation to your
-GitHub repositories. They cover common development, quality, documentation,
-release, and maintenance tasks.
+This repository provides a centralized collection of reusable GitHub Actions workflows that can be shared and imported across multiple repositories.
 
-The [workflow catalog](.github/workflows/README.md) lists each workflow's
-purpose and trigger.
+Instead of defining the same CI/CD automation independently in every project, common workflows are maintained in one place and consumed by individual repositories as needed. The collection covers common development, quality, documentation, release, and maintenance tasks.
 
-## Choose a reuse method
-
-### Call a reusable workflow
-
-Use this method only for a workflow that declares `workflow_call` under its
-`on` key. Reference the workflow from the consuming repository by repository
-and ref:
+Workflows that are designed for reuse can be referenced directly from consuming repositories:
 
 ```yaml
 jobs:
@@ -25,31 +16,24 @@ jobs:
     uses: electrocucaracha/gh-workflows/.github/workflows/<workflow>.yml@<ref>
 ```
 
-Use an immutable release tag or commit SHA for `<ref>` when you need
-reproducible runs. Pass only the inputs and secrets the workflow requires, and
-keep the workflow's `permissions` as narrow as possible. See GitHub's
-[reusable workflows documentation](https://docs.github.com/en/actions/sharing-automations/reusing-workflows)
-for supported inputs, secrets, and permissions.
+The `<ref>` can point to a release tag or commit SHA. Using an immutable reference is recommended when reproducibility and predictable builds are important.
 
-### Copy a workflow into your repository
+The [workflow catalog](.github/workflows/README.md) provides an overview of the available workflows, including their purpose and supported triggers.
 
-Copy a workflow when you need project-specific triggers, commands, or
-configuration:
+![Diagram](docs/assets/diagram.png)
 
-1. Copy the required workflow file from `.github/workflows/` into the same
-   directory in your project.
-2. Review its triggers, path filters, permissions, secrets, environment
-   variables, runners, and project-specific commands.
-3. Adjust the workflow for your repository and commit it to your project.
+# Why Use Shared Workflows?
 
-Copied workflows may require project-specific tools, labels, secrets, or
-repository structure. Treat the copied file as a starting point. Verify it in
-a branch before enabling it for a production branch.
+Centralizing GitHub workflows provides several benefits:
 
-For coordination between independent repositories, use
-[`repository_dispatch`](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#repository_dispatch)
-or [`workflow_dispatch`](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_dispatch)
-with an explicitly scoped token. These events support dependent builds,
-releases, and multi-repository deployments. Review the token's permissions and
-the receiving workflow's authorization checks before enabling cross-repository
-automation.
+- *Reduce duplication* — Define common automation once instead of maintaining similar workflow files across multiple repositories.
+- *Improve consistency* — Apply the same development, quality, release, and maintenance practices across projects.
+- *Simplify maintenance* — Fix bugs, improve automation, and introduce enhancements in a single shared workflow rather than updating every consuming repository.
+- *Increase reusability* — Make proven automation available to any repository that needs it without copying and adapting workflow definitions.
+- *Accelerate project setup* — Add standardized CI/CD capabilities to a new repository with a simple workflow reference.
+- *Promote best practices* — Establish common patterns for permissions, security, testing, releases, and other automation concerns.
+- *Improve governance* — Centralized workflows make it easier to review, standardize, and evolve automation across an organization.
+- *Enable controlled adoption* — Repositories can reference a specific release tag or commit SHA, allowing teams to adopt workflow changes at their own pace while maintaining reproducible runs.
+- *Reduce operational overhead* — A single source of truth makes workflow ownership and improvements easier to manage over time.
+
+By treating workflows as shared building blocks rather than repository-specific configuration, this project makes GitHub Actions automation easier to share, standardize, maintain, and evolve.
