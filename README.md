@@ -26,14 +26,14 @@ The [workflow catalog](.github/workflows/README.md) provides an overview of the 
 
 Centralizing GitHub workflows provides several benefits:
 
-- *Reduce duplication* — Define common automation once instead of maintaining similar workflow files across multiple repositories.
-- *Improve consistency* — Apply the same development, quality, release, and maintenance practices across projects.
-- *Simplify maintenance* — Fix bugs, improve automation, and introduce enhancements in a single shared workflow rather than updating every consuming repository.
-- *Increase reusability* — Make proven automation available to any repository that needs it without copying and adapting workflow definitions.
-- *Accelerate project setup* — Add standardized CI/CD capabilities to a new repository with a simple workflow reference.
-- *Promote best practices* — Establish common patterns for permissions, security, testing, releases, and other automation concerns.
-- *Improve governance* — Centralized workflows make it easier to review, standardize, and evolve automation across an organization.
-- *Enable controlled adoption* — Repositories can reference a specific release tag or commit SHA, allowing teams to adopt workflow changes at their own pace while maintaining reproducible runs.
-- *Reduce operational overhead* — A single source of truth makes workflow ownership and improvements easier to manage over time.
+- **Reduce duplication** — Define common automation once instead of maintaining similar workflow files across multiple repositories.
+- **Improve consistency** — Apply the same development, quality, release, and maintenance practices across projects.
+- **Simplify maintenance** — Fix bugs, improve automation, and introduce enhancements in a single shared workflow rather than updating every consuming repository.
+- **Increase reusability** — Make proven automation available to any repository that needs it without copying and adapting workflow definitions.
+- **Accelerate project setup** — Add standardized CI/CD capabilities to a new repository with a simple workflow reference.
+- **Promote best practices** — Establish common patterns for permissions, security, testing, releases, and other automation concerns.
+- **Improve governance** — Centralized workflows make it easier to review, standardize, and evolve automation across an organization.
+- **Enable controlled adoption** — Repositories can reference a specific release tag or commit SHA, allowing teams to adopt workflow changes at their own pace while maintaining reproducible runs.
+- **Reduce operational overhead** — A single source of truth makes workflow ownership and improvements easier to manage over time.
 
 By treating workflows as shared building blocks rather than repository-specific configuration, this project makes GitHub Actions automation easier to share, standardize, maintain, and evolve.
