@@ -9,6 +9,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.4.3] - 2026-09-04
+
+### Changed
+
+- Optimized workflow permissions to reduce privilege surface and align with GitHub's best practices, while also enhancing workflow isolation by introducing branch-specific concurrency. [a9808dbf](https://github.com/electrocucaracha/gh-workflows/commit/a9808dbf8b9751a27d3f9304fef3d0a38f37e4a0)
+
+## [5.4.2] - 2026-09-02
+
+### Changed
+
+- Improved the layout and positioning of workflow components in the Improvers Workflow diagram. [125a1e6a](https://github.com/electrocucaracha/gh-workflows/commit/125a1e6a6a1807dad8e255bf8b85e3c998bf35ee)
+
+## [5.4.1] - 2026-09-02
+
+### Changed
+
+- Streamlined linting error aggregation to produce a compact, actionable summary suitable for automated analysis, while maintaining fallback logic to surface raw output for debugging in the absence of structured errors. [74d76b7e](https://github.com/electrocucaracha/gh-workflows/commit/74d76b7e7c6c14485e0ed8399f56810a8a037cfb)
+
+## [5.4.0] - 2026-09-02
+
+### Added
+
+- Enabled consistent linter adoption and easier onboarding for new consumers with the addition of a reusable linter workflow, including a how-to guide and reference page detailing workflow inputs, environment variables, and failure handling. [2f95b2d5](https://github.com/electrocucaracha/gh-workflows/commit/2f95b2d5b581b168afa3d5775a141b864d7f9c0f)
+
+## [5.3.0] - 2026-09-02
+
+### Added
+
+- Improved linting error reporting now provides detailed output for each failure, including overall Super-Linter summary and log excerpts, significantly enhancing visibility into linter failures and streamlining troubleshooting. [4b935fa4](https://github.com/electrocucaracha/gh-workflows/commit/4b935fa43dd23746d2e2c39e27a4e5224c448978)
+
+## [5.2.4] - 2026-09-02
+
+### Changed
+
+- Upgraded the Biome schema to version 2.5.11 to ensure compatibility with new configuration options and tooling improvements, and excluded SVG files from processing to prevent unnecessary formatting and potential errors on assets. [2932de3c](https://github.com/electrocucaracha/gh-workflows/commit/2932de3c45b578cfe14915d7abc3b6b633cf8a00)
+
+## [5.2.3] - 2026-09-02
+
+### Changed
+
+- Clarified the layout and arrow flows in the Improvers workflow diagrams to improve their clarity and maintainability without altering any functional content. [4433811a](https://github.com/electrocucaracha/gh-workflows/commit/4433811af8821728618451f4c6d18f6bd05a57a9)
+
+## [5.2.2] - 2026-09-01
+
+### Changed
+
+- The documentation for the Improvers workflow now includes a visual diagram that provides a clear and concise overview of the workflow steps. [9f560d1d](https://github.com/electrocucaracha/gh-workflows/commit/9f560d1d69856ec560190de4977a638062234b67)
+
+## [5.2.1] - 2026-09-01
+
+### Changed
+
+- Standardized table column widths and alignment in how-to and reference docs to improve readability and maintain consistency across documentation, and updated the workflow title in the quickstart tutorial to use "codebase" for stylistic consistency. [906f844b](https://github.com/electrocucaracha/gh-workflows/commit/906f844b75ce9dae1afcad68a74c29e4a5c0b645)
+
+## [5.2.0] - 2026-09-01
+
+### Added
+
+- Enabled repository maintainers to onboard, configure, and troubleshoot the improvers workflow with minimal friction by providing comprehensive setup and usage instructions. [5f71be4d](https://github.com/electrocucaracha/gh-workflows/commit/5f71be4db8cea4598384084abe166142ae7228f1)
+
+## [5.1.0] - 2026-08-31
+
+### Added
+
+- Introduced a comprehensive CHANGELOG.md following Keep a Changelog and Semantic Versioning conventions, detailing all significant additions, removals, and fixes across project versions and improving transparency and maintenance by centralizing release notes and rationale for changes. [07251a50](https://github.com/electrocucaracha/gh-workflows/commit/07251a502e58a09224734d81db5da0eeb34a7509)
+
 ## [5.0.0] - 2026-08-31
 
 ### Removed
