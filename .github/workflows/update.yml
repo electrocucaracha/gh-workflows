@@ -13,6 +13,9 @@ on:
     - cron: "0 0 * * 5"
   workflow_dispatch:
   workflow_call:
+    secrets:
+      WORKFLOW_TOKEN:
+        required: true
 permissions:
   contents: read
 concurrency:
