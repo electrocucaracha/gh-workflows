@@ -172,7 +172,7 @@ jobs:
             If the evidence is insufficient, say exactly what is missing and point to the relevant workflow log section instead of inventing a cause.
           # jscpd:ignore-start
       - name: Get the entire analysis output
-        did: get-analysis-output
+        id: get-analysis-output
         if: failure() && steps.get-failed-linters.outputs.has-errors == 'true'
         env:
           RESPONSE_FILE: ${{ steps.ai-linter-analysis.outputs.response-file }}
