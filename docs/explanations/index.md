@@ -11,7 +11,11 @@ Use these to understand why the workflow behaves the way it does.
 
 ## Available explanations
 
+- [How the workflows fit together](workflows.md)
 - [How the improvers workflow works](how-it-works.md)
+- [How the linter workflow works](linter-workflow.md)
+- [How the update workflow works](update-workflow.md)
+- [How the release workflow works](release-workflow.md)
 
 ## Next
 

@@ -1,7 +1,7 @@
 ---
 title: How the improvers workflow works
 parent: Explanations
-nav_order: 1
+nav_order: 2
 ---
 
 # How the improvers workflow works
@@ -13,6 +13,8 @@ Each consuming repository owns its trigger, Copilot credential, custom agent fil
 ## Execution flow
 
 ![Improvers workflow execution flow](../assets/improvers-workflow.png)
+
+[Open the editable improvers diagram](../assets/improvers-workflow.drawio)
 
 The reusable workflow runs in the context of the caller.
 GitHub resolves the workflow definition from `electrocucaracha/gh-workflows`,
@@ -60,6 +62,7 @@ A future migration can remove the long-lived secret by granting `copilot-request
 
 ## Related documentation
 
+- [How the workflows fit together](workflows.md)
 - [Set up the improvers workflow](../tutorials/quickstart.md)
 - [Consume and customize the workflow](../how-to-guides/consume-improvers.md)
 - [Improvers workflow reference](../references/improvers-workflow.md)

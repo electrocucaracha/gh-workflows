@@ -12,6 +12,8 @@ Use these as lookup material while adopting or operating the automation.
 ## Available references
 
 - [Improvers workflow reference](improvers-workflow.md)
+- [Linter workflow reference](linter-workflow.md)
+- [Update workflow reference](update-workflow.md)
 
 ## Next
 
