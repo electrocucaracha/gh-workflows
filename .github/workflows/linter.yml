@@ -83,7 +83,7 @@ jobs:
                 "# Failed Linter Summary",
                 "",
                 (map(select(.Exitval != 0))
-                  | map("- \(.Linter // \"unknown\") | \(.Path // .FilePath // \"unknown-path\") | line \(.Line // .StartLine // \"?\")")
+                  | map("- \(.Linter // "unknown") | \(.Path // .FilePath // "unknown-path") | line \(.Line // .StartLine // "?")")
                   | join("\n")
                 )
               ]
