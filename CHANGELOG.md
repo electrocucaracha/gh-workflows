@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.5.0] - 2026-09-04
+
+### Added
+
+- Enabled quick project metrics in the documentation by introducing new readme badges for code style, CI status, visitor count, and code statistics, and by counting lines of code using the scc tool on each push and pull request. [175cf595](https://github.com/electrocucaracha/gh-workflows/commit/175cf595ec4d76504d63aec0f6e3f2a4b15ffe92)
+
+## [6.4.1] - 2026-09-04
+
+### Fixed
+
+- Corrected the GitHub Actions linter workflow to properly recognize and reference outputs or contexts. [aa8207e0](https://github.com/electrocucaracha/gh-workflows/commit/aa8207e0068549c3ee1715a3893d4be00f42290a)
+
+## [6.4.0] - 2026-09-04
+
+### Added
+
+- Modernized documentation for releases 6.3.0 to 6.3.3 with detailed changelog entries, providing improved release transparency and a complete project history for recent changes. [a6600c6f](https://github.com/electrocucaracha/gh-workflows/commit/a6600c6faaf61b0e2577d9d83519045ecfad40de)
+
 ## [6.3.3] - 2026-09-04
 
 ### Changed
