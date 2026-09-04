@@ -19,6 +19,9 @@ on:
         type: string
         required: false
         default: "{}"
+    secrets:
+      COPILOT_TOKEN:
+        required: true
 jobs:
   check-super-linter:
     name: Run Super-Linter Validation
@@ -132,6 +135,8 @@ jobs:
       - uses: actions/ai-inference@2c43c91ae16266ca159d311430343c67a5ffa222 # v3
         id: ai-linter-analysis
         if: failure() && steps.get-failed-linters.outputs.has-errors == 'true'
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
         with:
           model: mistral-ai/Ministral-3B
           input: |
