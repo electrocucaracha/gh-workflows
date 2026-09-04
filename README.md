@@ -23,7 +23,6 @@ and ref:
 jobs:
   shared-workflow:
     uses: electrocucaracha/gh-workflows/.github/workflows/<workflow>.yml@<ref>
-    secrets: inherit
 ```
 
 Use an immutable release tag or commit SHA for `<ref>` when you need
