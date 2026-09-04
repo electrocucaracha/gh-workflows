@@ -9,6 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.2.2] - 2026-09-04
+
+### Changed
+
+- Clarified the workflow responsibilities and relationships between validation, maintenance, and release paths for repository automation by introducing new diagrams and explanations for the linter, release, and workflow lifecycle. [31363870](https://github.com/electrocucaracha/gh-workflows/commit/31363870c34331970e63760fc4ffb0561d7fc2d0)
+
+## [6.2.1] - 2026-09-04
+
+### Changed
+
+- Updated the pre-commit configuration to leverage the latest bugfixes and improvements from shellcheck-py v0.11.0.1-1 and ai-prepare-commit-msg v15.2.2. [bbbfda0e](https://github.com/electrocucaracha/gh-workflows/commit/bbbfda0efdd8f23d5ae77755fcb05afa93136d2a)
+
+## [6.2.0] - 2026-09-04
+
+### Added
+
+- Enabled maintainers to more easily keep version files up to date by providing a detailed explanation of the update workflow, a how-to guide for consuming the reusable workflow, and a reference page documenting the workflow contract and implementation details. [6aa34478](https://github.com/electrocucaracha/gh-workflows/commit/6aa3447896c4ecea8ed2819b6e3e2bb2d6e06924)
+
+## [6.1.1] - 2026-09-04
+
+### Fixed
+
+- Stabilized the linter summary output in GitHub Actions by correcting the jq filter to use standard double quotes, ensuring proper interpretation and preventing YAML parsing errors. [73dccddb](https://github.com/electrocucaracha/gh-workflows/commit/73dccddb1919cf93f25b157b5d11df0146369f9a)
+
+## [6.1.0] - 2026-09-04
+
+### Added
+
+- Enabled detailed changelog entries for versions 5.5.0 and 5.6.0, documenting new features and security improvements, and clarified secrets inheritance in the 6.0.0 release by removing a confusing example from the workflow documentation, improving release transparency and user understanding of project evolution. [41dfd127](https://github.com/electrocucaracha/gh-workflows/commit/41dfd1271e6e8891e9c9621574d499ab97796fda)
+
 ## [6.0.0] - 2026-09-04
 
 ### Removed
