@@ -138,7 +138,7 @@ jobs:
         env:
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
         with:
-          model: mistral-ai/Ministral-3B
+          model: gpt-4.1
           input: |
             diff: ${{ steps.git-diff.outputs.raw-diff }}
             linter_summary: available in linter-summary.md
