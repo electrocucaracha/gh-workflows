@@ -40,58 +40,60 @@ Invalid JSON causes the configuration step to fail before Super-Linter runs.
 
 The Super-Linter step uses these settings:
 
-| Setting                              | Value                     | Effect                                                        |
-| :----------------------------------- | :------------------------ | :------------------------------------------------------------ |
-| `LINTER_RULES_PATH`                  | `/`                       | Searches the checked-out repository for linter configuration. |
-| `SAVE_SUPER_LINTER_OUTPUT`           | `true`                    | Saves Super-Linter output files for later steps.              |
-| `SAVE_SUPER_LINTER_SUMMARY`          | `true`                    | Saves the Super-Linter summary.                               |
-| `ENABLE_GITHUB_ACTIONS_STEP_SUMMARY` | `true`                    | Adds the summary to the Actions run summary.                  |
-| `CREATE_LOG_FILE`                    | `true`                    | Creates `super-linter.log`.                                   |
-| `KUBERNETES_KUBECONFORM_OPTIONS`     | `-ignore-missing-schemas` | Allows Kubernetes validation without every schema present.    |
-| `DEFAULT_BRANCH`                     | Head ref or ref name      | Selects the comparison branch for the run.                    |
+| Setting                          | Value                     | Effect                                                        |
+| :------------------------------- | :------------------------ | :------------------------------------------------------------ |
+| `LINTER_RULES_PATH`              | `/`                       | Searches the checked-out repository for linter configuration. |
+| `SAVE_SUPER_LINTER_OUTPUT`       | `true`                    | Saves Super-Linter output files for later steps.              |
+| `KUBERNETES_KUBECONFORM_OPTIONS` | `-ignore-missing-schemas` | Allows Kubernetes validation without every schema present.    |
+| `DEFAULT_BRANCH`                 | Head ref or ref name      | Selects the comparison branch for the run.                    |
 
 The workflow passes `GITHUB_TOKEN` to Super-Linter for GitHub integration.
-It passes the required `COPILOT_TOKEN` to the Copilot CLI analysis action.
+It passes the required `COPILOT_TOKEN`,
+plus `GITHUB_TOKEN`,
+to the Copilot CLI analysis step.
 
 ## Failure handling
-
-The `Get failed linter logs` step reads files under
-`super-linter-output/super-linter/` and writes:
-
-| File                  | Contents                                               |
-| :-------------------- | :----------------------------------------------------- |
-| `linter-errors.jsonl` | One JSON object per failed linter.                     |
-| `linter-errors.json`  | JSON array of failed-linter objects.                   |
-| `linter-summary.md`   | Human-readable failure summary and available raw logs. |
-| `linter-prompt.md`    | Prompt context supplied to the AI analysis action.     |
-
-Each structured diagnostic includes the linter name, exit code, standard output,
-and standard error.
-The output is limited to the first 400 lines of each captured stream.
 
 The workflow installs and initializes `rtk` on every run so that the Copilot
 CLI can use its token-saving integration.
 
-The Copilot CLI analysis runs only when failing entries are found.
-It uses the pinned `austenstone/copilot-cli` action with the `janitor` agent,
-receives the changed-file diff and the generated prompt file,
-and writes its complete response to `linter-analysis.md` in the workspace.
+When the job has failed,
+the workflow also sets up `uv` and generates a Graphify repository map
+(`graphify . --no-viz --code-only`) before the Copilot CLI step runs.
+These two steps are skipped on a successful run,
+since nothing needs diagnosing.
+
+The `Run Copilot CLI analysis and file issue` step runs only when the job has
+failed.
+It uses the pinned `austenstone/copilot-cli` action with the
+`principal-software-engineer` agent and `GITHUB_TOKEN` in its environment.
 The action allows the tools and paths needed for diagnosis
-while denying destructive shell commands.
-The requested response contains a diagnosis, fix, verification command,
-agent-ready prompt, and prevention recommendation.
+while denying destructive shell commands
+(`rm`, `sudo`, `chown`, `chmod 777`, `dd`).
+Its `mcp-config` starts the Graphify MCP server (`graphify . --mcp`),
+so the agent can call `query_graph`, `get_node`, `get_neighbors`,
+and `shortest_path` instead of scanning the checkout blindly.
+
+The prompt directs the agent to gather its own evidence:
+
+| Evidence               | How the agent collects it                                                                |
+| :--------------------- | :--------------------------------------------------------------------------------------- |
+| Repository structure   | Query the pre-built Graphify graph and `graphify-out/GRAPH_REPORT.md` via the MCP tools. |
+| Structured diagnostics | Find JSON files under `./super-linter-output` whose `Exitval` is non-zero.               |
+| Raw output             | Inspect non-JSON files under `./super-linter-output` when no JSON errors exist.          |
+| Code diff              | Run `git diff` against the full history the checkout provides.                           |
+
+The requested response contains six sections: a plain-language summary,
+diagnosis, a fix that resolves the failure now,
+a verification command, an agent-ready prompt,
+and a recommendation to prevent recurrence.
+The agent then uses the `gh` CLI to search for an existing open issue
+labeled `super-linter-issue` and titled
+`super-linter GitHub action has failed`.
+It comments on that issue if one exists, or creates a new one with that title
+and label, prepending a link to the current run's logs.
 
 Every run adds Copilot CLI and `rtk` usage metrics to the Actions job summary.
-
-The final report contains two sections:
-
-- **Human Summary:** Markdown intended for maintainers reading the issue.
-- **Agent Data (JSON):** A stable payload with `schema_version`, failing linter
-  names, affected files, structured entries, and `ai_analysis`.
-
-`jayqi/failed-build-issue-action` publishes this report when the job fails,
-using the title `super-linter GitHub action has failed` and the label
-`super-linter-issue`.
 
 ## Source links
 

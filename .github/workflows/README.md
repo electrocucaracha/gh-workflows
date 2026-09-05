@@ -28,13 +28,13 @@ flowchart TD
 
 <!-- markdownlint-disable MD013 MD060 -->
 
-| Workflow file                    | Purpose                                                                                                                                                                     | Trigger                                          |
-| :------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
+| Workflow file                    | Purpose                                                                                                                                                                                              | Trigger                                          |
+| :------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
 | [linter.yml](./linter.yml)       | Runs repository lint and static analysis checks with `super-linter`, including aggregate failure reporting, Copilot CLI janitor analysis when validation fails, and Copilot CLI/`rtk` usage metrics. | `push`, `pull_request`, `workflow_call`          |
-| [metrics.yml](./metrics.yml)     | Checks out the repository, installs the `scc` tool, and reports lines-of-code metrics.                                                                                             | `push`, `pull_request`                           |
-| [improvers.yml](./improvers.yml) | Maintenance workflow that prepares a repository map and runs Copilot-driven improvement tasks for technical debt reduction, ignored rule cleanup, and coverage improvement.       | `schedule`, `workflow_dispatch`, `workflow_call` |
-| [update.yml](./update.yml)       | Scheduled maintenance workflow that refreshes managed version files and opens a pull request with the resulting updates.                                                          | `schedule`, `workflow_dispatch`, `workflow_call` |
-| [release.yml](./release.yml)     | Produces an AI-generated changelog, pushes changelog/tag updates, and creates a GitHub release from the latest semantic tag.                                                      | `workflow_dispatch`, `workflow_call`             |
+| [metrics.yml](./metrics.yml)     | Checks out the repository, installs the `scc` tool, and reports lines-of-code metrics.                                                                                                               | `push`, `pull_request`                           |
+| [improvers.yml](./improvers.yml) | Maintenance workflow that prepares a repository map and runs Copilot-driven improvement tasks for technical debt reduction, ignored rule cleanup, and coverage improvement.                          | `schedule`, `workflow_dispatch`, `workflow_call` |
+| [update.yml](./update.yml)       | Scheduled maintenance workflow that refreshes managed version files and opens a pull request with the resulting updates.                                                                             | `schedule`, `workflow_dispatch`, `workflow_call` |
+| [release.yml](./release.yml)     | Produces an AI-generated changelog, pushes changelog/tag updates, and creates a GitHub release from the latest semantic tag.                                                                         | `workflow_dispatch`, `workflow_call`             |
 
 <!-- markdownlint-enable MD013 MD060 -->
 

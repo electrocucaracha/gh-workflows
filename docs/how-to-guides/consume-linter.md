@@ -42,8 +42,8 @@ Triggers such as `push`, `pull_request`, and `workflow_dispatch` belong in the
 caller workflow.
 
 The `contents: read` permission lets checkout read the repository.
-The `issues: write` permission lets the workflow create or update a failed-build
-issue through `jayqi/failed-build-issue-action`.
+The `issues: write` permission lets the `GITHUB_TOKEN` handed to the Copilot
+CLI step create or comment on a failed-build issue.
 The inherited `COPILOT_TOKEN` secret lets the workflow run its Copilot CLI
 failure analysis.
 
@@ -84,18 +84,19 @@ files from the checked-out workspace.
 
 ## Inspect a failed run
 
-When a linter fails, the workflow:
+When a linter fails, the workflow generates a Graphify repository map, then
+runs a single Copilot CLI step that:
 
-1. Captures the changed-file diff.
-1. Collects per-linter exit codes and up to 400 lines of standard output and
-   standard error.
-1. Publishes a human-readable summary and structured JSON diagnostics.
-1. Requests a concise Copilot CLI diagnosis when failing entries are available.
-1. Creates or updates a `super-linter-issue` issue with the summary and agent
-   data.
+1. Queries the Graphify MCP server for repository structure instead of
+   scanning the checkout blindly.
+1. Inspects `./super-linter-output` for structured JSON diagnostics or, when
+   none exist, the raw Super-Linter logs.
+1. Runs `git diff` against the full history the checkout provides.
+1. Produces a diagnosis, fix, verification command, agent-ready prompt, and
+   prevention recommendation.
+1. Uses the `gh` CLI to comment on an existing `super-linter-issue` issue, or
+   create one, with the results.
 
-The Copilot CLI response is written to `linter-analysis.md` before it is added
-to the issue report.
 The workflow also publishes Copilot CLI and `rtk` usage metrics
 in the Actions job summary.
 

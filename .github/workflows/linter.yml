@@ -52,110 +52,66 @@ jobs:
           SAVE_SUPER_LINTER_OUTPUT: true
           KUBERNETES_KUBECONFORM_OPTIONS: "-ignore-missing-schemas"
           DEFAULT_BRANCH: ${{ github.head_ref || github.ref_name }}
-      - name: Capture failed workflow diff
-        uses: GrantBirki/git-diff-action@b27608d18e6dd9b31b46ede56a93e045d3881a28 # v3.0.0
-        id: git-diff
-        if: failure()
-      - name: Collect failed linter logs
-        id: get-failed-linters
-        if: failure()
-        run: |
-          set -euo pipefail
-
-          OUTPUT_ROOT='./super-linter-output'
-          ERROR_FILES=$(mktemp)
-          JSON_FILES=$(mktemp)
-          trap 'rm -f "$ERROR_FILES" "$JSON_FILES"' EXIT
-
-          if [ -d "$OUTPUT_ROOT" ]; then
-            find "$OUTPUT_ROOT" -type f -name '*.json' -print0 > "$JSON_FILES"
-          fi
-
-          if [ -s "$JSON_FILES" ]; then
-            while IFS= read -r -d '' file; do
-              jq -e 'type == "object" and (.Exitval // 0) != 0' "$file" >/dev/null && \
-                printf '%s\0' "$file" >> "$ERROR_FILES" || true
-            done < "$JSON_FILES"
-          fi
-
-          if [ -s "$ERROR_FILES" ]; then
-            xargs -0 jq -s '.' < "$ERROR_FILES" > linter-errors.json
-
-            # Build a compact, localization-focused summary for agentic analysis.
-            jq -r '
-              [
-                "# Failed Linter Summary",
-                "",
-                (map(select(.Exitval != 0))
-                  | map("- \(.Linter // "unknown") | \(.Path // .FilePath // "unknown-path") | line \(.Line // .StartLine // "?")")
-                  | join("\n")
-                )
-              ]
-              | join("\n")
-            ' linter-errors.json > linter-summary.md
-
-            echo "has-errors=true" >> "$GITHUB_OUTPUT"
-          else
-            echo '[]' > linter-errors.json
-            {
-              printf '# Failed Linter Summary\n\n'
-              printf 'No structured linter errors were found. Raw Super-Linter output follows.\n\n'
-              if [ -d "$OUTPUT_ROOT" ]; then
-                find "$OUTPUT_ROOT" -type f ! -name '*.json' -print -exec sh -c '
-                  printf "\\n### %s\\n\\n" "$1"
-                  sed -n "1,240p" "$1" 2>/dev/null || printf "(unreadable: permission denied)\\n"
-                ' _ {} \; || true
-              else
-                printf 'The super-linter output directory was not created. Inspect the workflow log for the failing step.\n'
-              fi
-            } > linter-summary.md
-            if [ -s linter-summary.md ]; then
-              echo "has-errors=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "has-errors=false" >> "$GITHUB_OUTPUT"
-            fi
-          fi
-
-          {
-            cat linter-summary.md
-            printf '\n## Structured Diagnostics\n```json\n'
-            cat linter-errors.json
-            printf '\n```\n'
-          } > linter-prompt.md
       - name: Install RTK token saver
         if: always()
         run: |
           curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.45.0/install.sh | sh
           rtk --version
           rtk init --global --copilot
-      - name: Run Copilot CLI analysis
+      - name: Set up uv
+        if: failure()
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: false
+      - name: Generate repository map with Graphify
+        if: failure()
+        run: |
+          uv tool install graphifyy
+          graphify --version
+          graphify . --no-viz --code-only
+      - name: Run Copilot CLI analysis and file issue
         uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
         id: ai-linter-analysis
-        if: failure() && steps.get-failed-linters.outputs.has-errors == 'true'
+        if: failure()
         env:
           COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           copilot-token: ${{ secrets.COPILOT_TOKEN }}
           allow-all-tools: true
           denied-tools: "shell(rm:*),shell(sudo:*),shell(chown:*),shell(chmod:777),shell(dd:*)"
           allow-all-paths: true
           allow-all-urls: true
-          agent: janitor
+          mcp-config: |
+            {
+              "mcpServers": {
+                "graphify": {
+                  "command": "graphify",
+                  "args": [".", "--mcp"]
+                }
+              }
+            }
+          agent: principal-software-engineer
           prompt: |
             You are an expert software engineer who specializes in diagnosing and fixing software build and runtime failures.
-            Provide a concise, evidence-based diagnosis, concrete fixes, a ready-to-run agent prompt, and a durable safeguard against recurrence.
 
-            Task: Analyze the Super-Linter diagnostics in linter-prompt.md and cross-reference them with the code diff from the failed workflow to determine the root cause of the failure.
-            The raw diff is: ${{ steps.git-diff.outputs.raw-diff }}
+            Task: The Super-Linter step of this workflow run failed. Gather your own evidence, diagnose the root cause, and file (or update) a GitHub issue with the results.
 
-            The linter-prompt.md file contains structured diagnostics. The companion linter-summary.md file may contain a human summary or raw output when the linter did not emit structured JSON.
+            Gather evidence yourself, using the shell and MCP tools available to you:
+            - Repository structure: the generated Graphify graph and report in graphify-out/GRAPH_REPORT.md are already built; use the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
+            - Structured diagnostics: find JSON files under ./super-linter-output whose "Exitval" field is non-zero; each one names the failing linter, file, and line.
+            - Raw output: if no structured JSON errors exist, inspect the non-JSON files under ./super-linter-output for the failure details.
+            - Code diff: run `git diff` (the checkout has full history, fetch-depth 0) against the base of this branch/PR to see what changed.
 
-            Response format:
+            Diagnosis body format:
+            ## Summary
+            One or two plain-language sentences stating what broke (which linter(s), how many files) so a reader can grasp the failure without reading further.
+
             ## Diagnosis
             State the most likely root cause and cite the linter, file, line, and message.
 
-            ## Fix
-            Give the smallest concrete fix. Include a unified diff only when the change is unambiguous.
+            ## Fix Now
+            Give the smallest concrete fix that resolves this failure today. Include a unified diff only when the change is unambiguous.
 
             ## Verification
             Name the command or workflow check that should confirm the fix.
@@ -164,116 +120,32 @@ jobs:
             Emit a single fenced ```text block containing a self-contained, copy-paste prompt for a coding agent (GitHub Copilot) running inside this repository.
             The prompt must name the exact files and line numbers to edit, restate the linter rule IDs being violated, describe the expected end state, and end with the verification command. Do not reference this issue or any external context the agent cannot read.
 
-            ## Prevention
+            ## Prevent Recurrence
             Recommend one durable safeguard so this class of failure does not recur, chosen from: a linter config change (with the file path and setting), a pre-commit hook entry, an editorconfig or formatter rule, or a workflow guard. Give the concrete snippet and where it goes. If the failure was a one-off with no reasonable safeguard, say so explicitly instead of inventing one.
 
-            Context strategy (agent-ready):
-            - Prioritize localization cues: identify exact files, line numbers, symbols, and changed hunks tied to failures.
-            - Prioritize repair direction: propose one primary fix path and one minimal fallback patch.
-            - De-prioritize generic narrative that does not narrow the fix search space.
+            If the evidence is insufficient, say exactly what is missing and point to the relevant workflow log section instead of inventing a cause. Never file an issue containing only generic or placeholder text; every section must reference concrete evidence you gathered.
 
-            If the evidence is insufficient, say exactly what is missing and point to the relevant workflow log section instead of inventing a cause.
-            Write the complete response to linter-analysis.md in the repository workspace.
+            Issue filing:
+            - Use the `gh` CLI (GITHUB_TOKEN is set in the environment) against repository ${{ github.repository }}.
+            - Search for an existing open issue labeled "super-linter-issue" titled "super-linter GitHub action has failed".
+            - If one exists, add a comment to it with the diagnosis body above. Otherwise create a new issue with that title and label.
+            - Prepend the diagnosis body with a link to this run's logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           fail-on-error: true
-      - name: Capture Copilot analysis output
-        id: get-analysis-output
-        if: failure() && steps.get-failed-linters.outputs.has-errors == 'true'
-        run: |
-          DELIM="EOF_$(uuidgen)"
-          {
-            printf "response<<%s\n" "$DELIM"
-            if [ -f linter-analysis.md ]; then
-              cat linter-analysis.md
-            else
-              printf 'Copilot CLI completed without writing linter-analysis.md. Inspect its workflow logs for details.\n'
-            fi
-            printf "\n%s\n" "$DELIM"
-          } >> "$GITHUB_OUTPUT"
-      - name: Build dual-mode linter issue report
-        id: build-issue-report
-        if: failure()
-        env:
-          AI_RESPONSE: ${{ steps.get-analysis-output.outputs.response || '' }}
-          HAS_ERRORS: ${{ steps.get-failed-linters.outputs.has-errors || 'false' }}
-        run: |
-          set -euo pipefail
-
-          # Create agent-focused machine JSON payload with stable keys.
-          if [ "$HAS_ERRORS" = "true" ] && [ -f linter-errors.json ]; then
-            jq -n --slurpfile errs linter-errors.json --arg ai "$AI_RESPONSE" '
-              {
-                schema_version: "1.0",
-                has_structured_errors: (($errs[0] | length) > 0),
-                failing_count: ($errs[0] | length),
-                failing_linters: ($errs[0] | map(.Linter // "unknown") | unique | sort),
-                files: ($errs[0] | map(.Path // .FilePath // "unknown-path") | unique | sort),
-                entries: ($errs[0] | map({
-                  linter: (.Linter // "unknown"),
-                  file: (.Path // .FilePath // "unknown-path"),
-                  line: (.Line // .StartLine // null),
-                  column: (.Column // .StartColumn // null),
-                  message: (.Message // .Description // "")
-                })),
-                ai_analysis: ($ai // "")
-              }
-            ' > machine-report.json
-          else
-            jq -n --arg ai "$AI_RESPONSE" '
-              {
-                schema_version: "1.0",
-                has_structured_errors: false,
-                failing_count: 0,
-                failing_linters: [],
-                files: [],
-                entries: [],
-                ai_analysis: ($ai // "")
-              }
-            ' > machine-report.json
-          fi
-
-          # Create human summary.
-          if [ "$HAS_ERRORS" = "true" ] && [ -f linter-summary.md ]; then
-            cp linter-summary.md human-summary.md
-          else
-            printf '# Failed Linter Summary\n\nNo structured failing linter entries were detected.\n' > human-summary.md
-          fi
-
-          DELIM="EOF_$(uuidgen)"
-          {
-            printf "report<<%s\n" "$DELIM"
-            printf '## Human Summary\n'
-            cat human-summary.md
-            printf '\n## Agent Data (JSON)\n```json\n'
-            cat machine-report.json
-            printf '```\n'
-            printf "%s\n" "$DELIM"
-          } >> "$GITHUB_OUTPUT"
-      - name: Create linter failure issue
-        uses: jayqi/failed-build-issue-action@1a893bbf43ef1c2a8705e2b115cd4f0fe3c5649b # v1.2.0
-        if: failure()
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          title-template: "super-linter GitHub action has failed"
-          label-name: super-linter-issue
-          body-template: |
-            The linter step has failed. Please check for new major versions and update manually.
-
-            Please check the [logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
-
-            ${{ steps.build-issue-report.outputs.report }}
       - name: Collect Copilot usage metrics
         if: always()
+        env:
+          NO_COLOR: "1"
         run: |
           {
             echo "## Copilot CLI Usage Metrics"
             echo
             echo "### ccusage"
             echo '```'
-            npx -y ccusage@latest || true
+            npx -y ccusage@latest copilot daily 2>&1 || echo "ccusage reported no Copilot CLI usage data for this run."
             echo '```'
             echo
             echo "### rtk stats"
             echo '```'
-            rtk gain || true
+            rtk gain 2>&1 || echo "rtk reported no usage data for this run."
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"

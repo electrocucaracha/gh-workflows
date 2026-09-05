@@ -35,47 +35,63 @@ variables for one caller.
 It is an escape hatch for repository differences,
 not a replacement for committed linter configuration.
 
-## Failure evidence has two audiences
+## The agent gathers its own evidence
+
+Earlier revisions of this workflow ran separate steps to capture the
+changed-file diff, parse Super-Linter's JSON output, and assemble a
+machine-readable report before an issue-filing action could run.
+The Copilot CLI action can already run shell commands,
+so those preparation steps duplicated work the agent could do itself.
 
 When validation fails,
-the workflow produces a human summary and a stable machine-readable report.
-The human summary is intended for maintainers reading the issue.
-The machine report contains the schema version,
-failing linter names, affected files, locations, messages, and any AI analysis.
-
-This dual format keeps the issue readable while allowing a coding agent
-or later automation to locate the failure without parsing prose.
-
-The changed-file diff gives the diagnosis useful scope.
+the workflow now runs a single Copilot CLI step
+using the pinned `austenstone/copilot-cli` action with the repository's
+`principal-software-engineer` agent.
+The prompt tells the agent to inspect `./super-linter-output` for structured
+JSON diagnostics or raw log files,
+and to run `git diff` itself against the full history the checkout provides.
 The linter output remains authoritative;
 the AI response is advisory and should be reviewed before anyone applies it.
 
-The diagnosis uses the pinned `austenstone/copilot-cli` action
-with the repository's `janitor` agent.
-The action reads `linter-prompt.md` and the changed-file diff,
-then writes its response to `linter-analysis.md`.
+Before that step runs,
+the workflow sets up `uv` and generates a Graphify repository map,
+the same code-only, no-viz map the improvers workflow builds.
+Both steps only run on failure,
+so a passing run never pays for a map nobody will read.
+The Copilot CLI step then starts Graphify as an MCP server,
+so the agent can query the graph for related files and callers instead of
+guessing from a directory listing.
+
 The workflow initializes `rtk` before analysis
 and records Copilot CLI and `rtk` usage metrics in the Actions job summary.
 
-## Why the workflow creates an issue
+## Why the agent files its own issue
 
-The issue is a durable handoff from CI to maintenance work.
+A GitHub issue is a durable handoff from CI to maintenance work.
 It preserves the failure summary after the transient workflow log becomes
 harder to find and gives maintainers a place to track the repair.
 The `super-linter-issue` label makes these reports discoverable.
 
-The issue action runs only after the job has failed.
+Rather than pass a prepared report to a separate issue-filing action,
+the prompt gives the Copilot CLI step the `GITHUB_TOKEN` it needs to run the
+`gh` CLI directly.
+The agent searches for an existing open issue with the `super-linter-issue`
+label and title before deciding whether to comment on it or open a new one,
+so repeated failures update one issue instead of creating duplicates.
+
+This step runs only after the job has failed.
 Successful validation does not create maintenance noise.
 
 ## Permission and secret boundary
 
 The workflow needs `contents: read` to inspect the repository
-and `issues: write` to publish the failure report.
-The caller also supplies the required `COPILOT_TOKEN` secret
-for the Copilot CLI analysis.
+and `issues: write` so the `GITHUB_TOKEN` it hands to the Copilot CLI step can
+create or comment on issues.
+The caller also supplies the required `COPILOT_TOKEN` secret,
+which authenticates the Copilot CLI action itself.
 The workflow passes the caller's `GITHUB_TOKEN` to Super-Linter
-and the issue-reporting action,
-but the Copilot CLI uses `COPILOT_TOKEN`.
+and to the Copilot CLI step,
+but the Copilot CLI action authenticates with `COPILOT_TOKEN`.
 
 ## Related documentation
 
