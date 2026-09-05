@@ -44,8 +44,20 @@ repos:
     rev: v2.4.3
     hooks:
       - id: codespell
+  - repo: local
+    hooks:
+      - id: prettier-check
+        name: prettier --check
+        entry: npx prettier --check
+        language: system
+        files: \.(md|ya?ml|json)$
+      - id: jscpd-check
+        name: jscpd duplicate check
+        entry: npx jscpd --config .jscpd.json
+        language: system
+        pass_filenames: false
   - repo: https://github.com/electrocucaracha/ai-prepare-commit-msg
-    rev: v15.2.2
+    rev: v15.4.2
     hooks:
       - id: ai-prepare-commit
         stages:
