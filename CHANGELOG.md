@@ -9,6 +9,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.8] - 2026-09-04
+
+### Changed
+
+- Enabled code quality automation via the introduction of jscpd duplicate code and prettier formatting checks via pre-commit, enforcing standards and improving maintainability across the codebase. [7362342e](https://github.com/electrocucaracha/gh-workflows/commit/7362342ec4b465d80999556fae6bb61b3e56f010)
+
+## [7.0.7] - 2026-09-04
+
+### Changed
+
+- Updated the GitHub Super-Linter badge link to accurately reflect the current CI workflow name, changing from "Lint codebase" to "CI: Lint and Static Checks", with no impact on breaking behavior or migration requirements. [0504c62a](https://github.com/electrocucaracha/gh-workflows/commit/0504c62ac522b7e1da128f8bc7b3bf683b6df1be)
+
+## [7.0.6] - 2026-09-04
+
+### Changed
+
+- Simplified linter failure diagnosis by delegating to the principal software engineer agent, eliminating intermediate parsing and reporting steps and establishing traceable expert-level analysis on failure. [8167d57d](https://github.com/electrocucaracha/gh-workflows/commit/8167d57d4d0e03dafe2e78593ecfc238cf54df75)
+
+## [7.0.5] - 2026-09-04
+
+### Changed
+
+- Standardized and clarified workflow step names in GitHub Actions files for improved maintainability and explicitness of CI step purposes. [eae4abff](https://github.com/electrocucaracha/gh-workflows/commit/eae4abffd771a6f0844908dac04792c4fa83d2a8)
+
+## [7.0.4] - 2026-09-04
+
+### Changed
+
+- Enabled repository lines-of-code metrics reporting through the introduction of a new metrics.yml workflow, which triggers on pushes and pull requests with no breaking behavior or migration requirements. [0ca0a2cd](https://github.com/electrocucaracha/gh-workflows/commit/0ca0a2cddeee246ba1e9e7dbc26ba603500cd333)
+
+## [7.0.3] - 2026-09-04
+
+### Changed
+
+- Enhanced linter workflow maintainability, observability, and diagnostic quality through improved Copilot integration and analysis, as well as the collection of usage metrics in the workflow summary. [5d5ece4f](https://github.com/electrocucaracha/gh-workflows/commit/5d5ece4fd948c397a99a3ff2baca8488aab9565b)
+
+## [7.0.2] - 2026-09-04
+
+### Changed
+
+- Modernized the linter workflow documentation to integrate with the Copilot CLI, replacing the `models: read` permission with the required `COPILOT_TOKEN` secret and clarifying secret and permission boundaries for the new analysis and reporting workflow steps. [c947fd74](https://github.com/electrocucaracha/gh-workflows/commit/c947fd746cf23479cd604495cca9d8dada251509)
+
+## [7.0.1] - 2026-09-04
+
+### Changed
+
+- Stabilized the readability of the readme overview section by reformatting long paragraphs into semantically broken lines, making the text easier to review and edit without altering the content. [5615674e](https://github.com/electrocucaracha/gh-workflows/commit/5615674ea0c58265d6a7f9c0477924d17fe13ba5)
+
+## [7.0.0] - 2026-09-04
+
+### Removed
+
+- Eliminated the hardcoded model value for the Copilot GitHub Action, allowing it to use its own default model version and improving maintainability and flexibility. [e73e7bcd](https://github.com/electrocucaracha/gh-workflows/commit/e73e7bcd1ccb7e89e599ddc3b9b708b31a891d6d)
+
+## [6.7.1] - 2026-09-04
+
+### Changed
+
+- Modernized the GitHub Copilot model used in the linter workflow to gpt-4.1, resulting in improved code analysis quality with no breaking behavior or migration requirements. [5b56e3f3](https://github.com/electrocucaracha/gh-workflows/commit/5b56e3f31347a270fb8b17c2d550003caee39bfc)
+
+## [6.7.0] - 2026-09-04
+
+### Added
+
+- Enabled authentication for Copilot in CI environments by requiring the COPILOT_TOKEN secret in both improvers and linter GitHub workflows. [51b5597c](https://github.com/electrocucaracha/gh-workflows/commit/51b5597c334c7ed813add274c426291771be1b4c)
+
+## [6.6.1] - 2026-09-04
+
+### Changed
+
+- Modernized repository badges in the readme to use the correct URLs after the project's name change from gh-workflows-msg to gh-workflows. [bd1b9a96](https://github.com/electrocucaracha/gh-workflows/commit/bd1b9a968a0dd1880feca57c5e89f3f3035cbb22)
+
+## [6.6.0] - 2026-09-04
+
+### Added
+
+- Modernized changelog entries for prior releases, enabled quick project metrics in the documentation, and resolved linter workflow issues to improve transparency and maintain a complete release history. [5ceecaa9](https://github.com/electrocucaracha/gh-workflows/commit/5ceecaa957515a8bf3d8624b14c0b95f4783f429)
+
 ## [6.5.0] - 2026-09-04
 
 ### Added
