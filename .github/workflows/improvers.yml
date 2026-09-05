@@ -107,16 +107,18 @@ jobs:
                    --head increase-code-coverage
                  - Keep the diff focused and reviewable.
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Install rtk token saver
+      - name: Install RTK token saver
         run: |
           curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.45.0/install.sh | sh
           rtk --version
           rtk init --global --copilot
-      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           enable-cache: false
       - name: Generate repository map with Graphify
@@ -124,7 +126,7 @@ jobs:
           uv tool install graphifyy
           graphify --version
           graphify . --no-viz --code-only
-      - name: Run Copilot CLI
+      - name: Run Copilot CLI improvement agent
         uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
@@ -146,7 +148,7 @@ jobs:
           agent: ${{ matrix.agent }}
           prompt: ${{ matrix.prompt }}
           fail-on-error: true
-      - name: Collect usage metrics
+      - name: Collect Copilot usage metrics
         if: always()
         run: |
           {
@@ -162,7 +164,7 @@ jobs:
             rtk gain || true
             echo '```'
           } | tee "metrics-${{ matrix.id }}.md" >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload usage metrics
+      - name: Upload Copilot usage metrics
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -175,13 +177,13 @@ jobs:
     if: always() && github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Download usage metrics
+      - name: Download Copilot usage metrics
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           pattern: copilot-metrics-*
           path: metrics
           merge-multiple: true
-      - name: Publish workflow summary
+      - name: Publish improvement summary
         run: |
           echo "# Maintenance Improvement Metrics" >> "$GITHUB_STEP_SUMMARY"
           echo >> "$GITHUB_STEP_SUMMARY"
