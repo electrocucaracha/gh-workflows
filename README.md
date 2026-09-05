@@ -13,9 +13,12 @@
 
 ## Overview
 
-This repository provides a centralized collection of reusable GitHub Actions workflows that can be shared and imported across multiple repositories.
+This repository provides a centralized collection of reusable GitHub Actions workflows
+that can be shared and imported across multiple repositories.
 
-Instead of defining the same CI/CD automation independently in every project, common workflows are maintained in one place and consumed by individual repositories as needed. The collection covers common development, quality, documentation, release, and maintenance tasks.
+Instead of defining the same CI/CD automation independently in every project,
+common workflows are maintained in one place and consumed by individual repositories as needed.
+The collection covers common development, quality, documentation, release, and maintenance tasks.
 
 Workflows that are designed for reuse can be referenced directly from consuming repositories:
 
@@ -25,9 +28,11 @@ jobs:
     uses: electrocucaracha/gh-workflows/.github/workflows/<workflow>.yml@<ref>
 ```
 
-The `<ref>` can point to a release tag or commit SHA. Using an immutable reference is recommended when reproducibility and predictable builds are important.
+The `<ref>` can point to a release tag or commit SHA.
+Using an immutable reference is recommended when reproducibility and predictable builds are important.
 
-The [workflow catalog](.github/workflows/README.md) provides an overview of the available workflows, including their purpose and supported triggers.
+The [workflow catalog](.github/workflows/README.md) provides an overview of the available workflows,
+including their purpose and supported triggers.
 
 ![Diagram](docs/assets/diagram.png)
 
@@ -45,4 +50,5 @@ Centralizing GitHub workflows provides several benefits:
 - **Enable controlled adoption** — Repositories can reference a specific release tag or commit SHA, allowing teams to adopt workflow changes at their own pace while maintaining reproducible runs.
 - **Reduce operational overhead** — A single source of truth makes workflow ownership and improvements easier to manage over time.
 
-By treating workflows as shared building blocks rather than repository-specific configuration, this project makes GitHub Actions automation easier to share, standardize, maintain, and evolve.
+By treating workflows as shared building blocks rather than repository-specific configuration,
+this project makes GitHub Actions automation easier to share, standardize, maintain, and evolve.
