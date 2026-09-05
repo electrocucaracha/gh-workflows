@@ -50,6 +50,13 @@ The changed-file diff gives the diagnosis useful scope.
 The linter output remains authoritative;
 the AI response is advisory and should be reviewed before anyone applies it.
 
+The diagnosis uses the pinned `austenstone/copilot-cli` action
+with the repository's `janitor` agent.
+The action reads `linter-prompt.md` and the changed-file diff,
+then writes its response to `linter-analysis.md`.
+The workflow initializes `rtk` before analysis
+and records Copilot CLI and `rtk` usage metrics in the Actions job summary.
+
 ## Why the workflow creates an issue
 
 The issue is a durable handoff from CI to maintenance work.
@@ -60,13 +67,15 @@ The `super-linter-issue` label makes these reports discoverable.
 The issue action runs only after the job has failed.
 Successful validation does not create maintenance noise.
 
-## Permission boundary
+## Permission and secret boundary
 
 The workflow needs `contents: read` to inspect the repository
-and `models: read` for the AI-assisted diagnosis.
-It needs `issues: write` to publish the failure report.
-It does not require a separate secret because the caller's `GITHUB_TOKEN`
-is passed to the validation and issue-reporting actions.
+and `issues: write` to publish the failure report.
+The caller also supplies the required `COPILOT_TOKEN` secret
+for the Copilot CLI analysis.
+The workflow passes the caller's `GITHUB_TOKEN` to Super-Linter
+and the issue-reporting action,
+but the Copilot CLI uses `COPILOT_TOKEN`.
 
 ## Related documentation
 

@@ -24,7 +24,6 @@ on:
 
 permissions:
   contents: read
-  models: read
   issues: write
 
 jobs:
@@ -32,10 +31,10 @@ jobs:
     uses: electrocucaracha/gh-workflows/.github/workflows/linter.yml@main
     permissions:
       contents: read
-      models: read
       issues: write
     with:
       validate_overrides: "{}"
+    secrets: inherit
 ```
 
 The `workflow_call` entry point is invoked by the caller's job.
@@ -43,12 +42,14 @@ Triggers such as `push`, `pull_request`, and `workflow_dispatch` belong in the
 caller workflow.
 
 The `contents: read` permission lets checkout read the repository.
-The `models: read` permission supports the AI-assisted failure analysis.
 The `issues: write` permission lets the workflow create or update a failed-build
 issue through `jayqi/failed-build-issue-action`.
+The inherited `COPILOT_TOKEN` secret lets the workflow run its Copilot CLI
+failure analysis.
 
-The caller does not need `secrets: inherit` because this workflow uses the
-caller-provided `GITHUB_TOKEN` and does not declare required secrets.
+The reusable workflow declares `COPILOT_TOKEN` as required.
+Use `secrets: inherit` when the secret exists in the caller repository
+or organization.
 
 ## Pin the reusable workflow
 
@@ -89,9 +90,14 @@ When a linter fails, the workflow:
 1. Collects per-linter exit codes and up to 400 lines of standard output and
    standard error.
 1. Publishes a human-readable summary and structured JSON diagnostics.
-1. Requests a concise AI diagnosis when structured linter output is available.
+1. Requests a concise Copilot CLI diagnosis when failing entries are available.
 1. Creates or updates a `super-linter-issue` issue with the summary and agent
    data.
+
+The Copilot CLI response is written to `linter-analysis.md` before it is added
+to the issue report.
+The workflow also publishes Copilot CLI and `rtk` usage metrics
+in the Actions job summary.
 
 Open the failed workflow run to review the complete Super-Linter log and the
 generated issue.

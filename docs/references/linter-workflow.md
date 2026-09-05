@@ -8,15 +8,15 @@ nav_order: 2
 
 ## Workflow
 
-| Property             | Value                                             |
-| :------------------- | :------------------------------------------------ |
-| Path                 | `.github/workflows/linter.yml`                    |
-| Reusable entry point | `workflow_call`                                   |
-| Direct entry points  | `push`, `pull_request`                            |
-| Runner               | `ubuntu-latest`                                   |
-| Super-Linter         | `super-linter/super-linter` `v8.7.0`              |
-| Required secret      | None                                              |
-| Required permissions | `contents: read`, `models: read`, `issues: write` |
+| Property             | Value                                |
+| :------------------- | :----------------------------------- |
+| Path                 | `.github/workflows/linter.yml`       |
+| Reusable entry point | `workflow_call`                      |
+| Direct entry points  | `push`, `pull_request`               |
+| Runner               | `ubuntu-latest`                      |
+| Super-Linter         | `super-linter/super-linter` `v8.7.0` |
+| Required secret      | `COPILOT_TOKEN`                      |
+| Required permissions | `contents: read`, `issues: write`    |
 
 ## Input
 
@@ -51,6 +51,7 @@ The Super-Linter step uses these settings:
 | `DEFAULT_BRANCH`                     | Head ref or ref name      | Selects the comparison branch for the run.                    |
 
 The workflow passes `GITHUB_TOKEN` to Super-Linter for GitHub integration.
+It passes the required `COPILOT_TOKEN` to the Copilot CLI analysis action.
 
 ## Failure handling
 
@@ -68,10 +69,19 @@ Each structured diagnostic includes the linter name, exit code, standard output,
 and standard error.
 The output is limited to the first 400 lines of each captured stream.
 
-The AI analysis runs only when structured failing entries are found.
-It receives the changed-file diff and the generated prompt file.
+The workflow installs and initializes `rtk` on every run so that the Copilot
+CLI can use its token-saving integration.
+
+The Copilot CLI analysis runs only when failing entries are found.
+It uses the pinned `austenstone/copilot-cli` action with the `janitor` agent,
+receives the changed-file diff and the generated prompt file,
+and writes its complete response to `linter-analysis.md` in the workspace.
+The action allows the tools and paths needed for diagnosis
+while denying destructive shell commands.
 The requested response contains a diagnosis, fix, verification command,
 agent-ready prompt, and prevention recommendation.
+
+Every run adds Copilot CLI and `rtk` usage metrics to the Actions job summary.
 
 The final report contains two sections:
 
