@@ -50,3 +50,9 @@ jobs:
           COMMIT_NAME: "electrocucaracha bot"
           PR_BRANCH_NAME: "versions-update-${PR_ID}"
           PR_TITLE: "Upgrade versions files"
+          # Default body embeds full COMMANDS_OUTPUT, which can exceed GitHub's
+          # 65536-character PR body limit when uv.lock changes are large.
+          PR_BODY: |
+            Automated update of managed version files.
+
+            ${FILES_SUMMARY}
