@@ -32,11 +32,11 @@ jobs:
       - name: Fetch AI changelog notes
         run: git fetch origin refs/notes/ai-changelog:refs/notes/ai-changelog || true
       - name: Set up uv
-        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           enable-cache: false
       - name: Set up Ollama
-        uses: ai-action/setup-ollama@3f581ee292df757e21de2bcb3b573bd8a44f198d # v2.0.71
+        uses: ai-action/setup-ollama@435e3afb7a5b950ac8868a114712baded7616c24 # v2.0.74
       - name: Generate changelog and semantic tags
         run: |
           uvx --from git+https://github.com/electrocucaracha/ai-changelog.git ai-changelog --create-semver-tags .
