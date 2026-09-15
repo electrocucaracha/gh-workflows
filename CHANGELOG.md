@@ -9,6 +9,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.0.1] - 2026-09-15
+
+### Changed
+
+- Enabled graphify-mcp functionality by updating the installation process to use the mcp extra and modifying the mcp server configuration to use graphify-mcp with the correct output file argument. [73d1dc5e](https://github.com/electrocucaracha/gh-workflows/commit/73d1dc5e046f9aa61b8127f3715ff85388dd4844)
+
+## [9.0.0] - 2026-09-15
+
+### Removed
+
+- Simplified the configuration of tools like markdownlint, shellcheck, and yamllint by removing unnecessary rule suppressions in various configuration files, which may require adjustments in the consuming repository's workflows and configuration files. [f26a5589](https://github.com/electrocucaracha/gh-workflows/commit/f26a5589fdf7ace2e87c2e4b64b5971863373085)
+
+## [8.0.2] - 2026-09-15
+
+### Changed
+
+- Optimized the project's maintenance efficiency by removing outdated GitHub Actions and updating the `ci/update_versions.sh` script, resulting in reduced maintenance effort. [bddf7376](https://github.com/electrocucaracha/gh-workflows/commit/bddf737686bd735da48db538d06c7811802445f0)
+
+## [8.0.1] - 2026-09-15
+
+### Changed
+
+- Upgraded several dependencies across GitHub workflows to newer versions, including actions/checkout to v7.0.1, setup-uv to v10.1.0, download-artifact to v8.0.1, and setup-ollama to v2.0.74, while also raising the minimum required Go version to 1.27 in the metrics.yml workflow. [44558726](https://github.com/electrocucaracha/gh-workflows/commit/44558726e440f197daf2e39bb04033f3fe92430f)
+
+## [8.0.0] - 2026-09-15
+
+### Removed
+
+- Enabled more accurate linting and formatting by removing unnecessary rule suppressions and updating configuration files to reflect the project's use of Semantic Line Breaks. [0ddfdc5d](https://github.com/electrocucaracha/gh-workflows/commit/0ddfdc5d7c00e87668eed1815bf5ccb1b476a84f)
+
+## [7.3.1] - 2026-09-15
+
+### Changed
+
+- Eliminated dead configuration by removing stale GitHub Action exceptions from the ci/update_versions.sh script and deleting unused workflow diagram exports. [78f9c579](https://github.com/electrocucaracha/gh-workflows/commit/78f9c5791839173f0715794923a5b5e0192f4065)
+
+## [7.3.0] - 2026-09-10
+
+### Added
+
+- Enabled GitHub workflows to prevent errors caused by exceeding the 65,536-character limit for pull request bodies by setting a static PR body with a brief description and a files summary. [10694cf4](https://github.com/electrocucaracha/gh-workflows/commit/10694cf45de8f9b86ae0fbeea574ce80a9ddf9c8)
+
+## [7.2.3] - 2026-09-11
+
+### Changed
+
+- Modernized version dependencies in GitHub workflows to the latest versions. [0e921b5f](https://github.com/electrocucaracha/gh-workflows/commit/0e921b5f5b3d8caf3bf4a864fc622944a15c0c85)
+
+## [7.2.2] - 2026-09-08
+
+### Changed
+
+- Standardized command invocations in GitHub Actions environments by updating workflows to use the RTK CLI and ensure PATH setup for reliable tooling discovery. [27a48e21](https://github.com/electrocucaracha/gh-workflows/commit/27a48e21fe74f5a95a9a41089480a7dad5f249b6)
+
+## [7.2.1] - 2026-09-08
+
+### Changed
+
+- Improved the clarity and completeness of the repository's GitHub Actions workflows, emphasizing reusable workflows and explaining responsibilities and trigger events to make it easier for users and maintainers to understand and adopt them. [7d5c006c](https://github.com/electrocucaracha/gh-workflows/commit/7d5c006c2b04fb7392c3d6e39747485d1f7e8a64)
+
+## [7.2.0] - 2026-09-05
+
+### Added
+
+- Enabled display of funding links on the repository page to help sustain ongoing open source development through GitHub Sponsors and Buy Me a Coffee sponsorships. [68755bd1](https://github.com/electrocucaracha/gh-workflows/commit/68755bd1f1ece8361587d9348f51022323311732)
+
+## [7.1.0] - 2026-09-04
+
+### Added
+
+- Enabled repository badges and authentication for Copilot in CI environments, and introduced code quality automation, modernized linter workflow documentation, and updated GitHub Super-Linter badge link. [bed6c5dd](https://github.com/electrocucaracha/gh-workflows/commit/bed6c5dde1aad2a9ce9a1ca2bea5c5e5eb98308a)
+
 ## [7.0.8] - 2026-09-04
 
 ### Changed
