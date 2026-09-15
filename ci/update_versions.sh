@@ -64,7 +64,7 @@ resolve_action_commit_hash() {
 
 # Update GitHub Action commit hashes
 gh_actions=$(grep -rhoE 'uses: [^@]+@' .github | sed -E 's/uses: ([^@]+)@/\1/' | sort -u)
-exceptions=('reviewdog/action-misspell' 'actions/attest-build-provenance' 'GrantBirki/git-diff-action' 'golangci/golangci-lint-action' 'actions/checkout' 'actions/upload-artifact')
+exceptions=('actions/checkout' 'actions/upload-artifact')
 # Actions pinned to a specific version and excluded from auto-updates.
 # Remove an entry only once the underlying issue is confirmed resolved.
 # austenstone/copilot-cli: v3.0+ depends on actions/setup-copilot@v0 which does
