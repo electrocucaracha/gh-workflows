@@ -37,8 +37,7 @@ Create `.github/workflows/update.yml` in the consuming repository:
 ```yaml
 name: "Maintenance: Scheduled Dependency Version Updates"
 
-# yamllint disable-line rule:truthy
-on:
+"on":
   schedule:
     - cron: "0 0 * * 5"
   workflow_dispatch:

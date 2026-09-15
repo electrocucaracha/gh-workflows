@@ -16,8 +16,7 @@ Create `.github/workflows/linter.yml` in the consuming repository:
 ```yaml
 name: "CI: Lint and Static Checks"
 
-# yamllint disable-line rule:truthy
-on:
+"on":
   push:
   pull_request:
   workflow_dispatch:

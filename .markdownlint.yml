@@ -1,4 +1,7 @@
 # Jekyll front-matter provides the page H1 via the `title:` key; allow a
 # second H1 in the body so authors can write self-contained documents.
 MD025: false
+# Line length is intentionally unbounded: docs use Semantic Line Breaks
+# (see .github/instructions/markdown-semantic-line-breaks.instructions.md)
+# instead of hard wrapping, so MD013 would flag valid content.
 MD013: false
