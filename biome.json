@@ -1,7 +1,12 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.11/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.12/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
   "files": {
-    "includes": ["**", "!**/*.svg"]
+    "includes": ["**", "!**/*.svg", "!graphify-out"]
   },
   "formatter": {
     "indentStyle": "space",

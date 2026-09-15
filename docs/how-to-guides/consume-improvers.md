@@ -17,8 +17,7 @@ Create `.github/workflows/improvers.yml` in the consuming repository:
 ```yaml
 name: "Maintenance: Code Base Quality Improvements"
 
-# yamllint disable-line rule:truthy
-on:
+"on":
   schedule:
     - cron: "0 0 15 * *"
   workflow_dispatch:

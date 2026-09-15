@@ -18,7 +18,7 @@ trap "make fmt" EXIT
 
 if ! command -v go >/dev/null; then
     curl -fsSL http://bit.ly/install_pkg | PKG=go-lang bash
-    # shellcheck disable=SC1091
+    # shellcheck disable=SC1091 # file is created by the installer above; not present during static analysis
     source /etc/profile.d/path.sh
 fi
 
@@ -87,6 +87,5 @@ for action in $gh_actions; do
     else
         commit_hash=$(resolve_action_commit_hash "$action" '^[vV]?[0-9]+(\.[0-9]+)*$')
     fi
-    # shellcheck disable=SC2267
-    grep -ElRZ "uses: $action@" .github/ | xargs -0 -l sed -i -e "s|uses: $action@.*|uses: $action@$commit_hash|g"
+    grep -ElRZ "uses: $action@" .github/ | xargs -0 -I{} sed -i -e "s|uses: $action@.*|uses: $action@$commit_hash|g" {}
 done

@@ -34,4 +34,7 @@ pnpm-debug.log*
 tmp/
 *.tmp
 
+# Graphify generated analysis output (regenerated on demand, not source)
+graphify-out/
+
 package*.json
