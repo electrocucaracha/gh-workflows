@@ -128,8 +128,12 @@ jobs:
         run: |
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/.local/bin:$PATH"
-          uv tool install graphifyy
+
+          uv tool install "graphifyy[mcp]"
+
           graphify --version
+          graphify-mcp --help
+
           graphify . --no-viz --code-only
       - name: Run Copilot CLI improvement agent
         uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
@@ -145,8 +149,8 @@ jobs:
             {
               "mcpServers": {
                 "graphify": {
-                  "command": "graphify",
-                  "args": [".", "--mcp"]
+                  "command": "graphify-mcp",
+                  "args": ["graphify-out/graph.json"]
                 }
               }
             }
