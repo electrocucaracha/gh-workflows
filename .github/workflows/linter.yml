@@ -11,6 +11,7 @@ name: "CI: Lint and Static Checks"
 on:
   push:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
   workflow_call:
     inputs:
       validate_overrides:
@@ -73,13 +74,14 @@ jobs:
         run: |
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/.local/bin:$PATH"
-          uv tool install graphifyy
+          uv tool install "graphifyy[mcp]"
           graphify --version
+          graphify-mcp --help
           graphify . --no-viz --code-only
       - name: Run Copilot CLI analysis and file issue
         uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
         id: ai-linter-analysis
-        if: failure()
+        if: failure() && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         env:
           COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -93,8 +95,8 @@ jobs:
             {
               "mcpServers": {
                 "graphify": {
-                  "command": "graphify",
-                  "args": [".", "--mcp"]
+                  "command": "graphify-mcp",
+                  "args": ["graphify-out/graph.json"]
                 }
               }
             }
