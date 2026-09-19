@@ -172,6 +172,15 @@ jobs:
             echo '```'
             rtk gain || true
             echo '```'
+            echo
+            echo "### Graphify usage"
+            echo '```'
+            if [ -f graphify-out/cost.json ]; then
+              jq . graphify-out/cost.json || cat graphify-out/cost.json
+            else
+              echo "Graphify reported no usage/cost data for this run."
+            fi
+            echo '```'
           } | tee "metrics-${{ matrix.id }}.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Upload Copilot usage metrics
         if: always()

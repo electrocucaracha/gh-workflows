@@ -93,7 +93,7 @@ labeled `super-linter-issue` and titled
 It comments on that issue if one exists, or creates a new one with that title
 and label, prepending a link to the current run's logs.
 
-Every run adds Copilot CLI and `rtk` usage metrics to the Actions job summary.
+Every run adds Copilot CLI, `rtk`, and Graphify usage metrics to the Actions job summary.
 
 ## Source links
 

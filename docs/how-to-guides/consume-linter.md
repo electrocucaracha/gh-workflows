@@ -96,7 +96,7 @@ runs a single Copilot CLI step that:
 1. Uses the `gh` CLI to comment on an existing `super-linter-issue` issue, or
    create one, with the results.
 
-The workflow also publishes Copilot CLI and `rtk` usage metrics
+The workflow also publishes Copilot CLI, `rtk`, and Graphify usage metrics
 in the Actions job summary.
 
 Open the failed workflow run to review the complete Super-Linter log and the

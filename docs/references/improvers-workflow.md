@@ -39,7 +39,7 @@ Each matrix job:
 1. Installs Graphify and generates a code-only repository graph.
 1. Starts Graphify as a Model Context Protocol (MCP) server.
 1. Runs Copilot CLI with the selected custom agent and task prompt.
-1. Collects `ccusage` and RTK metrics.
+1. Collects `ccusage`, RTK, and Graphify usage metrics.
 1. Uploads the metrics as a workflow artifact.
 
 The summary job merges available metrics into the GitHub Actions job summary even when an improvement job fails.

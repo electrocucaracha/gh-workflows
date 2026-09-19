@@ -63,7 +63,7 @@ so the agent can query the graph for related files and callers instead of
 guessing from a directory listing.
 
 The workflow initializes `rtk` before analysis
-and records Copilot CLI and `rtk` usage metrics in the Actions job summary.
+and records Copilot CLI, `rtk`, and Graphify usage metrics in the Actions job summary.
 
 ## Why the agent files its own issue
 

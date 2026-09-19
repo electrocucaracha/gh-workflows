@@ -144,7 +144,7 @@ the suppression-review task uses both commands.
 1. Review the pull requests created from `tech-debt-reduction`,
    `remove-ignored-rules`,
    and `increase-code-coverage`.
-1. Open the workflow summary to inspect Copilot CLI and token-saving usage metrics.
+1. Open the workflow summary to inspect Copilot CLI, token-saving, and Graphify usage metrics.
 
 Do not merge generated pull requests without reviewing their changes and validation results.
 

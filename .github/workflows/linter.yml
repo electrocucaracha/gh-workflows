@@ -158,4 +158,13 @@ jobs:
             echo '```'
             rtk gain 2>&1 || echo "rtk reported no usage data for this run."
             echo '```'
+            echo
+            echo "### Graphify usage"
+            echo '```'
+            if [ -f graphify-out/cost.json ]; then
+              jq . graphify-out/cost.json 2>&1 || cat graphify-out/cost.json
+            else
+              echo "Graphify reported no usage/cost data for this run."
+            fi
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
