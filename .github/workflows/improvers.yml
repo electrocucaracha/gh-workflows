@@ -136,7 +136,7 @@ jobs:
 
               Issue filing:
               - Use the `gh` CLI through RTK, for example `rtk gh issue list` and `rtk gh issue create` (GITHUB_TOKEN is set in the environment), against repository ${{ github.repository }}.
-              - Title the issue "Perspective review: ${{ steps.persona.outputs.role }}".
+              - Title the issue "Perspective review".
               - Label it "perspective-review" (create the label first if it does not exist).
               - If an open issue with this exact title already exists, update it instead of creating a duplicate.
     steps:
@@ -217,9 +217,16 @@ jobs:
           fail-on-error: true
       - name: Collect Copilot usage metrics
         if: always()
+        env:
+          METRICS_NAME: ${{ matrix.name }}
+          PERSONA_ROLE: ${{ steps.persona.outputs.role }}
         run: |
           {
-            echo "## ${{ matrix.name }}${{ steps.persona.outputs.role && format(' ({0})', steps.persona.outputs.role) || '' }}"
+            if [ -n "$PERSONA_ROLE" ]; then
+              printf '## %s (%s)\n' "$METRICS_NAME" "$PERSONA_ROLE"
+            else
+              printf '## %s\n' "$METRICS_NAME"
+            fi
             echo
             echo "### ccusage"
             echo '```'
