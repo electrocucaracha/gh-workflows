@@ -29,6 +29,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     strategy:
       fail-fast: false
       matrix:
@@ -106,6 +107,38 @@ jobs:
                    --base "$DEFAULT_BRANCH" \
                    --head increase-code-coverage
                  - Keep the diff focused and reviewable.
+          - id: perspective-review
+            name: Perspective-Based Code Review
+            agent: ""
+            prompt: |-
+              Perform an independent code review of this repository from the perspective and focus areas defined in your own agent instructions.
+
+              This is a review-only task: do NOT modify, create, or delete any repository files, and do NOT open a Pull Request. Your only output is a GitHub issue.
+
+              Workflow:
+              1. Review the generated Graphify graph and report in graphify-out/GRAPH_REPORT.md, then use the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
+              2. From your persona's perspective, examine the code, workflows, and documentation for drawbacks, blind spots, risks, or missed opportunities that other reviewers commonly overlook.
+              3. Prioritize findings that are concrete and actionable; cite exact file paths (and line numbers when applicable). Use `rtk` for any shell inspection, for example `rtk git grep` and `rtk cat`.
+              4. Do not restate generic best practices; every finding must reference actual code or docs found in this repository.
+
+              Issue body format:
+              ## Persona
+              State the reviewer persona and its focus area.
+
+              ## Findings
+              A bulleted list of concrete drawbacks/blind spots, each with a file path (and line number if applicable) and a one- or two-sentence explanation of the risk.
+
+              ## Recommendations
+              For each finding, one concrete, actionable recommendation.
+
+              ## Out of Scope
+              Note anything you considered but could not verify due to lack of evidence, rather than speculating.
+
+              Issue filing:
+              - Use the `gh` CLI through RTK, for example `rtk gh issue list` and `rtk gh issue create` (GITHUB_TOKEN is set in the environment), against repository ${{ github.repository }}.
+              - Title the issue "Perspective review: ${{ steps.persona.outputs.role }}".
+              - Label it "perspective-review" (create the label first if it does not exist).
+              - If an open issue with this exact title already exists, update it instead of creating a duplicate.
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -135,10 +168,35 @@ jobs:
           graphify-mcp --help
 
           graphify . --no-viz --code-only
+      - name: Select a random reviewer persona
+        id: persona
+        if: matrix.id == 'perspective-review'
+        run: |
+          set -euo pipefail
+
+          # Pool of reviewer persona agents defined under .github/agents
+          personas=(
+            security-auditor
+            performance-engineer
+            accessibility-specialist
+            site-reliability-engineer
+            junior-developer
+            technical-writer
+            compliance-reviewer
+            skeptical-staff-engineer
+          )
+          index=$(( RANDOM % ${#personas[@]} ))
+          agent="${personas[$index]}"
+          role=$(grep -m1 '^name:' ".github/agents/${agent}.agent.md" | sed -E 's/^name:[[:space:]]*"?([^"]*)"?[[:space:]]*$/\1/')
+
+          echo "agent=${agent}" >> "$GITHUB_OUTPUT"
+          echo "role=${role}" >> "$GITHUB_OUTPUT"
+          echo "Selected persona: ${role} (${agent})"
       - name: Run Copilot CLI improvement agent
         uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           copilot-token: ${{ secrets.COPILOT_TOKEN }}
           allow-all-tools: true
@@ -154,14 +212,14 @@ jobs:
                 }
               }
             }
-          agent: ${{ matrix.agent }}
+          agent: ${{ matrix.agent || steps.persona.outputs.agent }}
           prompt: ${{ matrix.prompt }}
           fail-on-error: true
       - name: Collect Copilot usage metrics
         if: always()
         run: |
           {
-            echo "## ${{ matrix.name }}"
+            echo "## ${{ matrix.name }}${{ steps.persona.outputs.role && format(' ({0})', steps.persona.outputs.role) || '' }}"
             echo
             echo "### ccusage"
             echo '```'
