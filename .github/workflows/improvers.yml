@@ -41,7 +41,7 @@ jobs:
               Reduce technical debt and submit a Pull Request with the improvements.
 
               Workflow:
-              1. Review the generated Graphify graph and report in graphify-out/GRAPH_REPORT.md, then use the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
+              1. Use the generated Graphify graph through the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
               2. Analyze the repo for unused code, duplication, dead paths, and unnecessary complexity.
               3. Delete and simplify safely. Preserve behavior and avoid breaking public APIs.
               4. Validate by running: rtk make test
@@ -62,7 +62,7 @@ jobs:
               Review the codebase and configuration files for rules that are being ignored or suppressed, and remove that suppression by fixing the underlying issue with best practices where feasible.
 
               Workflow:
-              1. Review the generated Graphify graph and report in graphify-out/GRAPH_REPORT.md, then use the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
+              1. Use the generated Graphify graph through the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
               2. Search for suppression markers across the repo, including but not limited to:
                  - Go: `//nolint`, `//go:build ignore`
                  - jscpd: `jscpd:ignore-start` / `jscpd:ignore-end`
@@ -93,7 +93,7 @@ jobs:
               Increase code coverage and submit a Pull Request with the improvements.
 
               Workflow:
-              1. Review the generated Graphify graph and report in graphify-out/GRAPH_REPORT.md, then use the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
+              1. Use the generated Graphify graph through the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
               2. Analyze the latest results of unit-test and gremlins-test GitHub Actions jobs to identify uncovered code paths and functions.
               3. Write new tests to cover those paths, ensuring they are meaningful and validate important edge cases.
               4. Validate by running: rtk make test
@@ -116,7 +116,7 @@ jobs:
               This is a review-only task: do NOT modify, create, or delete any repository files, and do NOT open a Pull Request. Your only output is a GitHub issue.
 
               Workflow:
-              1. Review the generated Graphify graph and report in graphify-out/GRAPH_REPORT.md, then use the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
+              1. Use the generated Graphify graph through the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
               2. From your persona's perspective, examine the code, workflows, and documentation for drawbacks, blind spots, risks, or missed opportunities that other reviewers commonly overlook.
               3. Prioritize findings that are concrete and actionable; cite exact file paths (and line numbers when applicable). Use `rtk` for any shell inspection, for example `rtk git grep` and `rtk cat`.
               4. Do not restate generic best practices; every finding must reference actual code or docs found in this repository.
@@ -168,6 +168,10 @@ jobs:
           graphify-mcp --help
 
           graphify . --no-viz --code-only
+          test -s graphify-out/graph.json
+          printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"graphify-smoke","version":"1.0"}}}' |
+            graphify-mcp graphify-out/graph.json |
+            jq -e 'select(.result.serverInfo.name != null)'
       - name: Select a random reviewer persona
         id: persona
         if: matrix.id == 'perspective-review'

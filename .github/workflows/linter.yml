@@ -78,6 +78,10 @@ jobs:
           graphify --version
           graphify-mcp --help
           graphify . --no-viz --code-only
+          test -s graphify-out/graph.json
+          printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"graphify-smoke","version":"1.0"}}}' |
+            graphify-mcp graphify-out/graph.json |
+            jq -e 'select(.result.serverInfo.name != null)'
       - name: Run Copilot CLI analysis and file issue
         uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
         id: ai-linter-analysis
@@ -108,7 +112,7 @@ jobs:
 
             Gather evidence yourself, using the shell and MCP tools available to you:
             - Token-efficient shell usage: prefix shell commands with `rtk` so command output is compressed, for example `rtk git diff` and `rtk gh issue list`.
-            - Repository structure: the generated Graphify graph and report in graphify-out/GRAPH_REPORT.md are already built; use the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
+            - Repository structure: the generated Graphify graph is already built; use the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
             - Structured diagnostics: find JSON files under ./super-linter-output whose "Exitval" field is non-zero; each one names the failing linter, file, and line.
             - Raw output: if no structured JSON errors exist, inspect the non-JSON files under ./super-linter-output for the failure details.
             - Code diff: run `rtk git diff` (the checkout has full history, fetch-depth 0) against the base of this branch/PR to see what changed.

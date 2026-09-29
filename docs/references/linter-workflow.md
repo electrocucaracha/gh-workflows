@@ -70,18 +70,18 @@ It uses the pinned `austenstone/copilot-cli` action with the
 The action allows the tools and paths needed for diagnosis
 while denying destructive shell commands
 (`rm`, `sudo`, `chown`, `chmod 777`, `dd`).
-Its `mcp-config` starts the Graphify MCP server (`graphify . --mcp`),
+Its `mcp-config` starts the Graphify MCP server (`graphify-mcp graphify-out/graph.json`),
 so the agent can call `query_graph`, `get_node`, `get_neighbors`,
 and `shortest_path` instead of scanning the checkout blindly.
 
 The prompt directs the agent to gather its own evidence:
 
-| Evidence               | How the agent collects it                                                                |
-| :--------------------- | :--------------------------------------------------------------------------------------- |
-| Repository structure   | Query the pre-built Graphify graph and `graphify-out/GRAPH_REPORT.md` via the MCP tools. |
-| Structured diagnostics | Find JSON files under `./super-linter-output` whose `Exitval` is non-zero.               |
-| Raw output             | Inspect non-JSON files under `./super-linter-output` when no JSON errors exist.          |
-| Code diff              | Run `git diff` against the full history the checkout provides.                           |
+| Evidence               | How the agent collects it                                                       |
+| :--------------------- | :------------------------------------------------------------------------------ |
+| Repository structure   | Query the pre-built Graphify graph via the MCP tools.                           |
+| Structured diagnostics | Find JSON files under `./super-linter-output` whose `Exitval` is non-zero.      |
+| Raw output             | Inspect non-JSON files under `./super-linter-output` when no JSON errors exist. |
+| Code diff              | Run `git diff` against the full history the checkout provides.                  |
 
 The requested response contains six sections: a plain-language summary,
 diagnosis, a fix that resolves the failure now,
