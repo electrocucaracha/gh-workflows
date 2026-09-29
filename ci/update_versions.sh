@@ -63,7 +63,12 @@ resolve_action_commit_hash() {
 }
 
 # Update GitHub Action commit hashes
-gh_actions=$(grep -rhoE 'uses: [^@]+@' .github | sed -E 's/uses: ([^@]+)@/\1/' | sort -u)
+# Self-references stay on @main so callers get the composite actions that match
+# the reusable workflow revision they already selected.
+gh_actions=$(grep -rhoE 'uses: [^@]+@' .github |
+    sed -E 's/uses: ([^@]+)@/\1/' |
+    grep -v '^electrocucaracha/gh-workflows/' |
+    sort -u)
 exceptions=('actions/checkout' 'actions/upload-artifact')
 # Actions pinned to a specific version and excluded from auto-updates.
 # Remove an entry only once the underlying issue is confirmed resolved.

@@ -1,0 +1,9 @@
+# SPDX-license-identifier: Apache-2.0
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # Composite actions hosted in this repository are referenced by branch
+        # so callers always get the same revision as the reusable workflow.
+        electrocucaracha/gh-workflows/*: ref-pin
+        "*": hash-pin

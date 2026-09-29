@@ -17,7 +17,8 @@ runs:
         enable-cache: false
     - name: Generate repository map with Graphify
       shell: bash
-      run: |
+      # Literal paths only; no attacker-controlled input reaches GITHUB_PATH.
+      run: | # zizmor: ignore[github-env]
         echo "$HOME/.local/bin" >> "$GITHUB_PATH"
         export PATH="$HOME/.local/bin:$PATH"
         uv tool install "graphifyy[mcp]"
