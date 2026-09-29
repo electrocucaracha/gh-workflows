@@ -1,0 +1,54 @@
+# SPDX-license-identifier: Apache-2.0
+##############################################################################
+# Copyright (c) 2026
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Apache License, Version 2.0
+# which accompanies this distribution, and is available at
+# http://www.apache.org/licenses/LICENSE-2.0
+##############################################################################
+name: "Run Copilot CLI agent"
+description: "Runs the Copilot CLI agent wired to the Graphify MCP server."
+inputs:
+  copilot-token:
+    description: "Token used to authenticate the Copilot CLI."
+    required: true
+  github-token:
+    description: "Token the agent uses for GitHub CLI operations."
+    required: true
+  default-branch:
+    description: "Base branch the agent targets when opening Pull Requests."
+    required: false
+    default: ""
+  agent:
+    description: "Agent definition to run."
+    required: true
+  prompt:
+    description: "Prompt handed to the agent."
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Run Copilot CLI agent
+      uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
+      env:
+        COPILOT_TOKEN: ${{ inputs.copilot-token }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        DEFAULT_BRANCH: ${{ inputs.default-branch }}
+      with:
+        copilot-token: ${{ inputs.copilot-token }}
+        allow-all-tools: true
+        denied-tools: "shell(rm:*),shell(sudo:*),shell(chown:*),shell(chmod:777),shell(dd:*)"
+        allow-all-paths: true
+        allow-all-urls: true
+        mcp-config: |
+          {
+            "mcpServers": {
+              "graphify": {
+                "command": "graphify-mcp",
+                "args": ["graphify-out/graph.json"]
+              }
+            }
+          }
+        agent: ${{ inputs.agent }}
+        prompt: ${{ inputs.prompt }}
+        fail-on-error: true

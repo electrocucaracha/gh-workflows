@@ -1,0 +1,29 @@
+# SPDX-license-identifier: Apache-2.0
+##############################################################################
+# Copyright (c) 2026
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Apache License, Version 2.0
+# which accompanies this distribution, and is available at
+# http://www.apache.org/licenses/LICENSE-2.0
+##############################################################################
+name: "Setup RTK"
+description: "Installs the RTK token saver CLI and initializes it for Copilot."
+inputs:
+  version:
+    description: "RTK release tag to install."
+    required: false
+    default: "v0.45.0"
+runs:
+  using: composite
+  steps:
+    - name: Install RTK token saver
+      shell: bash
+      env:
+        RTK_VERSION: ${{ inputs.version }}
+      run: |
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+        export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+        curl -fsSL "https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/${RTK_VERSION}/install.sh" | sh
+        rtk --version
+        rtk init --global --copilot

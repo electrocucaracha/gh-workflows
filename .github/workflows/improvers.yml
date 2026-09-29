@@ -146,32 +146,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Install RTK token saver
-        run: |
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-          curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.45.0/install.sh | sh
-          rtk --version
-          rtk init --global --copilot
-      - name: Set up uv
-        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
-        with:
-          enable-cache: false
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@main
       - name: Generate repository map with Graphify
-        run: |
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/.local/bin:$PATH"
-
-          uv tool install "graphifyy[mcp]"
-
-          graphify --version
-          graphify-mcp --help
-
-          graphify . --no-viz --code-only
-          test -s graphify-out/graph.json
-          printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"graphify-smoke","version":"1.0"}}}' |
-            graphify-mcp graphify-out/graph.json |
-            jq -e 'select(.result.serverInfo.name != null)'
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@main
       - name: Select a random reviewer persona
         id: persona
         if: matrix.id == 'perspective-review'
@@ -197,28 +174,13 @@ jobs:
           echo "role=${role}" >> "$GITHUB_OUTPUT"
           echo "Selected persona: ${role} (${agent})"
       - name: Run Copilot CLI improvement agent
-        uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
-        env:
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: electrocucaracha/gh-workflows/.github/actions/run-copilot-agent@main
         with:
           copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          allow-all-tools: true
-          denied-tools: "shell(rm:*),shell(sudo:*),shell(chown:*),shell(chmod:777),shell(dd:*)"
-          allow-all-paths: true
-          allow-all-urls: true
-          mcp-config: |
-            {
-              "mcpServers": {
-                "graphify": {
-                  "command": "graphify-mcp",
-                  "args": ["graphify-out/graph.json"]
-                }
-              }
-            }
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          default-branch: ${{ github.event.repository.default_branch }}
           agent: ${{ matrix.agent || steps.persona.outputs.agent }}
           prompt: ${{ matrix.prompt }}
-          fail-on-error: true
       - name: Collect Copilot usage metrics
         if: always()
         env:

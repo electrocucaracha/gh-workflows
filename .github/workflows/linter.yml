@@ -57,53 +57,17 @@ jobs:
           DEFAULT_BRANCH: ${{ github.head_ref || github.ref_name }}
       - name: Install RTK token saver
         if: always()
-        run: |
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-          curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.45.0/install.sh | sh
-          rtk --version
-          rtk init --global --copilot
-      - name: Set up uv
-        if: failure()
-        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
-        with:
-          enable-cache: false
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@main
       - name: Generate repository map with Graphify
         if: failure()
-        run: |
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/.local/bin:$PATH"
-          uv tool install "graphifyy[mcp]"
-          graphify --version
-          graphify-mcp --help
-          graphify . --no-viz --code-only
-          test -s graphify-out/graph.json
-          printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"graphify-smoke","version":"1.0"}}}' |
-            graphify-mcp graphify-out/graph.json |
-            jq -e 'select(.result.serverInfo.name != null)'
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@main
       - name: Run Copilot CLI analysis and file issue
-        uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
+        uses: electrocucaracha/gh-workflows/.github/actions/run-copilot-agent@main
         id: ai-linter-analysis
         if: failure() && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-        env:
-          COPILOT_TOKEN: ${{ secrets.COPILOT_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          allow-all-tools: true
-          denied-tools: "shell(rm:*),shell(sudo:*),shell(chown:*),shell(chmod:777),shell(dd:*)"
-          allow-all-paths: true
-          allow-all-urls: true
-          mcp-config: |
-            {
-              "mcpServers": {
-                "graphify": {
-                  "command": "graphify-mcp",
-                  "args": ["graphify-out/graph.json"]
-                }
-              }
-            }
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           agent: principal-software-engineer
           prompt: |
             You are an expert software engineer who specializes in diagnosing and fixing software build and runtime failures.
@@ -144,7 +108,6 @@ jobs:
             - Search for an existing open issue labeled "super-linter-issue" titled "super-linter GitHub action has failed".
             - If one exists, add a comment to it with the diagnosis body above. Otherwise create a new issue with that title and label.
             - Prepend the diagnosis body with a link to this run's logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          fail-on-error: true
       - name: Collect Copilot usage metrics
         if: always()
         env:
