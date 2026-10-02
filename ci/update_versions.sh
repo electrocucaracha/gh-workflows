@@ -39,6 +39,11 @@ if ! command -v uvx >/dev/null; then
 fi
 uvx pre-commit autoupdate
 
+# markdownlint runs as a local npx hook (avoids npm EALLOWGIT), which autoupdate skips.
+markdownlint_version="$(npm view markdownlint-cli version)"
+sed -i "s|npx --yes markdownlint-cli@[0-9.]*|npx --yes markdownlint-cli@${markdownlint_version}|" \
+    .pre-commit-config.yaml
+
 resolve_action_commit_hash() {
     local action=$1
     local version_pattern=$2
