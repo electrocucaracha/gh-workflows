@@ -31,11 +31,6 @@ repos:
         args: ["-v", "-iE006", "-iE005,E042,E043"]
         files: .*\.sh
         exclude: ".tox/.*"
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.49.1
-    hooks:
-      - id: markdownlint
-        files: \.(md|mdown|markdown)$
   - repo: https://github.com/google/yamlfmt
     rev: v0.21.0
     hooks:
@@ -46,6 +41,12 @@ repos:
       - id: codespell
   - repo: local
     hooks:
+      # Run via npx: newer npm rejects pre-commit's git+file install of node hooks (EALLOWGIT).
+      - id: markdownlint
+        name: markdownlint
+        entry: npx --yes markdownlint-cli@0.49.1
+        language: system
+        files: \.(md|mdown|markdown)$
       - id: prettier-check
         name: prettier --check
         entry: npx prettier --check
@@ -57,7 +58,7 @@ repos:
         language: system
         pass_filenames: false
   - repo: https://github.com/electrocucaracha/ai-prepare-commit-msg
-    rev: v19.2.4
+    rev: v19.8.1
     hooks:
       - id: ai-prepare-commit
         stages:
