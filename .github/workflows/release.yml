@@ -36,7 +36,7 @@ jobs:
         with:
           enable-cache: false
       - name: Set up Ollama
-        uses: ai-action/setup-ollama@bb1a15e4315698e668874dc3aad323d7c6d57ede # v2.1.0
+        uses: ai-action/setup-ollama@80ec1fde1ecef3f72b57cc8942bc7d6ff15e56cb # v2.1.2
       - name: Generate changelog and semantic tags
         run: |
           uvx --from git+https://github.com/electrocucaracha/ai-changelog.git ai-changelog --create-semver-tags .
