@@ -38,64 +38,10 @@ if ! command -v uvx >/dev/null; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 uvx pre-commit autoupdate
+uv run --no-project --with git+https://github.com/electrocucaracha/gh-updater.git gh-updater .
+uvx --refresh zizmor --offline --min-severity low .github/ --fix=all
 
 # markdownlint runs as a local npx hook (avoids npm EALLOWGIT), which autoupdate skips.
 markdownlint_version="$(npm view markdownlint-cli version)"
 sed -i "s|npx --yes markdownlint-cli@[0-9.]*|npx --yes markdownlint-cli@${markdownlint_version}|" \
     .pre-commit-config.yaml
-
-resolve_action_commit_hash() {
-    local action=$1
-    local version_pattern=$2
-
-    git ls-remote --tags "https://github.com/$action" |
-        awk -v version_pattern="$version_pattern" '
-    {
-        sha=$1
-        tag=$2
-        deref = (tag ~ /\^\{\}$/) ? 1 : 0
-        sub(/^refs\/tags\//, "", tag)
-        sub(/\^\{\}$/, "", tag)
-        if (tag ~ version_pattern) {
-            sortkey=tag
-            sub(/^[vV]/, "", sortkey)
-            print sortkey "\t" deref "\t" sha "\t" tag
-        }
-    }' |
-        sort -V -k1,1 -k2,2n |
-        tail -1 |
-        awk -F'\t' '{ printf "%s # %s\n", $3, $4 }'
-}
-
-# Update GitHub Action commit hashes
-# Self-references stay on @main so callers get the composite actions that match
-# the reusable workflow revision they already selected.
-gh_actions=$(grep -rhoE 'uses: [^@]+@' .github |
-    sed -E 's/uses: ([^@]+)@/\1/' |
-    grep -v '^electrocucaracha/gh-workflows/' |
-    sort -u)
-exceptions=('actions/checkout' 'actions/upload-artifact')
-# Actions pinned to a specific version and excluded from auto-updates.
-# Remove an entry only once the underlying issue is confirmed resolved.
-# austenstone/copilot-cli: v3.0+ depends on actions/setup-copilot@v0 which does
-# not yet exist publicly; keep at v2.0 until that action is released.
-readonly pinned_actions=('austenstone/copilot-cli')
-for action in $gh_actions; do
-    is_pinned=false
-    for pinned in "${pinned_actions[@]}"; do
-        if [[ $action == "$pinned" ]]; then
-            is_pinned=true
-            break
-        fi
-    done
-    if [[ $is_pinned == "true" ]]; then
-        echo "Skipping auto-update for pinned action: $action"
-        continue
-    fi
-    if [[ ${exceptions[*]} =~ (^|[^[:alpha:]])$action([^[:alpha:]]|$) ]]; then
-        commit_hash=$(resolve_action_commit_hash "$action" '^v?[0-9]+(\.[0-9]+)*$')
-    else
-        commit_hash=$(resolve_action_commit_hash "$action" '^[vV]?[0-9]+(\.[0-9]+)*$')
-    fi
-    grep -ElRZ "uses: $action@" .github/ | xargs -0 -I{} sed -i -e "s|uses: $action@.*|uses: $action@$commit_hash|g" {}
-done
