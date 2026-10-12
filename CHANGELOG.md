@@ -9,6 +9,120 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.4.4] - 2026-10-11
+
+### Changed
+
+- Updated GitHub Actions in workflows to reference specific commit hashes, ensuring reproducible and stable execution by preventing accidental updates due to moving tags or breaking changes in main branches. [a3c04387](https://github.com/electrocucaracha/gh-workflows/commit/a3c043874dc247ce98753c63f0cded0e4a9cb8a2)
+
+## [9.4.3] - 2026-10-09
+
+### Changed
+
+- Upgraded versions files to the latest versions, ensuring compatibility and security for GitHub workflows and pre-commit configuration. [17253968](https://github.com/electrocucaracha/gh-workflows/commit/172539684721af383bad6c551bc3a49b4abc1125)
+
+## [9.4.2] - 2026-10-09
+
+### Changed
+
+- Updated several dependencies to the latest versions: the Copilot usage metrics uploader and downloader actions now use v7.0.2, the Ollama setup action uses v8.0.2, the ai-prepare-commit-msg hook uses v2.1.4, and the other dependency uses v19.10.0. [536cd5cd](https://github.com/electrocucaracha/gh-workflows/commit/536cd5cd22d81fe88a43f0bea311f971b59095c6)
+
+## [9.4.1] - 2026-10-03
+
+### Changed
+
+- Updated the CI/CD and pre-commit system to utilize the latest versions of the linter, Ollama setup, and commit message preparation tools, including the Super-Linter bumped to v9.0.0 for bugfixes and improvements, and the ai-action/setup-ollama upgraded to v2.1.2 for compatibility and bugfixes. [0df06b4e](https://github.com/electrocucaracha/gh-workflows/commit/0df06b4e1880bf64e290783ddbfe850f849a27af)
+
+## [9.4.0] - 2026-10-02
+
+### Added
+
+- Automatically updates the markdownlint-cli npx hook in the pre-commit config to use the latest version from npm, eliminating the need for manual edits and keeping all tools current. [8eb7e1f0](https://github.com/electrocucaracha/gh-workflows/commit/8eb7e1f09b78949e00295f9ee5155b417c913c42)
+
+## [9.3.7] - 2026-10-01
+
+### Changed
+
+- Updated the markdownlint hook to run via npx in the local repository, ensuring compatibility with the latest npm versions that reject git-based installs of Node hooks due to EALLOWGIT errors. [b33708f3](https://github.com/electrocucaracha/gh-workflows/commit/b33708f3128fd4905f55cdde49925aa6543cefe4)
+
+## [9.3.6] - 2026-09-29
+
+### Changed
+
+- Updated the CI environment to utilize the latest versions of setup-uv and setup-ollama, enhancing consistency and security in the CI workflow definitions. [916eea77](https://github.com/electrocucaracha/gh-workflows/commit/916eea77ebd88369f988d06b18581a16c8b8b749)
+
+## [9.3.5] - 2026-09-29
+
+### Changed
+
+- Enabled zizmor to manage policies for action reference pinning, treating actions in this repository with ref-pin and others with hash-pin, while suppressing warnings about unsafe environment usage in setup-graphify and setup-rtk action steps. [81fd55b5](https://github.com/electrocucaracha/gh-workflows/commit/81fd55b5f4df37c917376274e89c90c14bcbf7ae)
+
+## [9.3.4] - 2026-09-29
+
+### Changed
+
+- Simplified the setup of RTK, Graphify, and Copilot CLI agent by extracting installation and setup into reusable composite actions, removing duplicated scripts and centralizing logic without altering workflow behavior. [445671d4](https://github.com/electrocucaracha/gh-workflows/commit/445671d436135046295eda2d70f770c3d0484062)
+
+## [9.3.3] - 2026-09-28
+
+### Changed
+
+- Streamlined Graphify usage steps in GitHub workflows and documentation to directly reference the Graphify graph with MCP tools, clarifying navigation instructions for contributors and strengthening automated verification. [87b0c7d7](https://github.com/electrocucaracha/gh-workflows/commit/87b0c7d792d677e010ede9c8ded5315797ae57d9)
+
+## [9.3.2] - 2026-09-28
+
+### Changed
+
+- Modernized the ai-prepare-commit-msg pre-commit hook to v19.2.4, ensuring improved commit message generation and adherence to current best practices without introducing breaking behavior or migration requirements. [cf5d0889](https://github.com/electrocucaracha/gh-workflows/commit/cf5d088974c874401a81653c1c77fef8987a5dde)
+
+## [9.3.1] - 2026-09-21
+
+### Fixed
+
+- Stabilized documentation consistency and issue titling in the workflow by correcting typos, standardizing issue titles, and reliably including persona roles in Copilot metrics output section headings. [96197407](https://github.com/electrocucaracha/gh-workflows/commit/96197407474def34a6739428e881bf74c9ce23b0)
+
+## [9.3.0] - 2026-09-21
+
+### Added
+
+- Introduced a "Perspective-Based Code Review" job to the improvers workflow, which selects a reviewer persona and uses a Copilot agent to inspect the repository from that persona's focus areas, producing a GitHub issue documenting its findings and increasing review coverage and encouraging diverse perspectives. [601a65ae](https://github.com/electrocucaracha/gh-workflows/commit/601a65aecd11cfa600731c0ecf215aa589bf87d1)
+
+## [9.2.0] - 2026-09-18
+
+### Added
+
+- Enabled Graphify usage and cost metrics reporting in both the improvers and linter GitHub Actions workflows, providing greater transparency into Graphify consumption for each workflow run. [1865c441](https://github.com/electrocucaracha/gh-workflows/commit/1865c441566707818885c9737e3bce994427f8cc)
+
+## [9.1.4] - 2026-09-18
+
+### Changed
+
+- Upgraded versions files to use the latest version of the ai-prepare-commit-msg repository, requiring a migration step to ensure compatibility. [99a53f40](https://github.com/electrocucaracha/gh-workflows/commit/99a53f40a79df1a067e15b626e14e5996d17529f)
+
+## [9.1.3] - 2026-09-18
+
+### Changed
+
+- Updated the pre-commit configuration to use the latest version of dependencies. [8d76a5d7](https://github.com/electrocucaracha/gh-workflows/commit/8d76a5d7ce7898b4e460ff6e18a813ca6b1e130f)
+
+## [9.1.2] - 2026-09-17
+
+### Changed
+
+- Updated the release workflow and pre-commit hook to use the latest versions of ai-action/setup-ollama and ai-prepare-commit-msg for improved reliability and features. [ebd64404](https://github.com/electrocucaracha/gh-workflows/commit/ebd64404c7f990deff4739b206561b17d1d4f57f)
+
+## [9.1.1] - 2026-09-17
+
+### Changed
+
+- Improved the CI workflow for linter tasks by enabling consistent triggers, restricting Copilot CLI runs to merged pull requests, and streamlining graphify usage, thereby reducing the likelihood of issues on closed but unmerged pull requests. [489f9bc9](https://github.com/electrocucaracha/gh-workflows/commit/489f9bc9dc7b0ea61b46680942189af78eeb65bf)
+
+## [9.1.0] - 2026-09-15
+
+### Added
+
+- Detailed release notes for versions 7.1.0 through 9.0.1 have been documented in the project's CHANGELOG.md, improving project documentation and enabling clear historical tracking of features and fixes. [030eb3dc](https://github.com/electrocucaracha/gh-workflows/commit/030eb3dcc20184ffb63d1088122f6f4f4392107e)
+
 ## [9.0.1] - 2026-09-15
 
 ### Changed
