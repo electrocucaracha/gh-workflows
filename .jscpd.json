@@ -1,6 +1,10 @@
 {
   "threshold": 1,
   "reporters": ["consoleFull"],
-  "ignore": ["**/__snapshots__/**", "**/node_modules/**"],
+  "ignore": [
+    "**/__snapshots__/**",
+    "**/node_modules/**",
+    "**/.github/agents/**"
+  ],
   "absolute": true
 }
