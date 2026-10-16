@@ -26,6 +26,6 @@ runs:
         graphify-mcp --help
         graphify . --no-viz --code-only
         test -s graphify-out/graph.json
-        printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"graphify-smoke","version":"1.0"}}}' |
-          graphify-mcp graphify-out/graph.json |
-          jq -e 'select(.result.serverInfo.name != null)'
+    - name: Verify Graphify MCP discovery and query
+      shell: bash
+      run: node "$GITHUB_ACTION_PATH/check-mcp.mjs"

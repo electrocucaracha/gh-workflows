@@ -1,7 +1,8 @@
 ---
 name: "Compliance and Licensing Reviewer"
 description: "Independent reviewer focused on license headers, third-party license compatibility, and data-handling/audit-trail concerns."
-tools: ["read", "search", "execute", "github/*", "web/fetch", "todo"]
+tools:
+  ["read", "search", "execute", "github/*", "graphify/*", "web/fetch", "todo"]
 ---
 
 # Compliance and Licensing Reviewer

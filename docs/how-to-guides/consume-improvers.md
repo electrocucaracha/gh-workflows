@@ -29,12 +29,19 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     uses: electrocucaracha/gh-workflows/.github/workflows/improvers.yml@main
     secrets: inherit
 ```
 
-The called job needs `contents: write` to push branches and `pull-requests: write` to open pull requests.
+The called job needs `contents: write` to push branches,
+`pull-requests: write` to open pull requests,
+and `issues: write` to create or update the perspective review issue and its label.
+All three must be granted on the calling job.
+Its `permissions` block sets omitted permissions to `none`,
+even with workflow-level `permissions: read-all`.
 The `secrets: inherit` setting makes the caller's `COPILOT_TOKEN` available to the reusable workflow.
+See the [workflow permission catalog](../../.github/workflows/README.md#job-permissions) for every workflow's requirements.
 
 ## Install the required agents
 
@@ -47,6 +54,10 @@ Keep these files in the consuming repository:
 
 The agent names in their frontmatter must continue to resolve from the matrix values in the reusable workflow.
 Copy both files again when their upstream definitions change.
+Copy the eight reviewer persona definitions from upstream `.github/agents/` as well,
+because `perspective-review` selects one of them at random.
+All participating agents must include `"graphify/*"` in their frontmatter `tools` lists.
+The workflow fails before spending Copilot tokens if the selected caller agent still has an old allowlist.
 
 ## Change the schedule
 
@@ -76,6 +87,40 @@ uses: electrocucaracha/gh-workflows/.github/workflows/improvers.yml@<release-tag
 
 Review upstream changes before updating the pinned reference.
 
+## Control cost and coverage evidence
+
+The default model is `gpt-5.4-mini`,
+autopilot continuation is disabled,
+and each agent step is limited to ten minutes.
+Override the model or provide coverage generation on the calling job:
+
+```yaml
+with:
+  model: gpt-5.4-mini
+  coverage-command: make coverage
+  coverage-report: coverage.out
+```
+
+The coverage command must be trusted,
+non-interactive workflow configuration.
+Go repositories generate coverage automatically when no command is supplied.
+For other languages,
+use a command and report appropriate to the repository;
+without coverage evidence,
+the coverage agent is skipped with a notice.
+Prefer a concise text report with uncovered function or line information.
+Configured coverage generation failures fail the job rather than starting an agent without evidence.
+
+Tasks skip existing open improvement pull requests and use bounded evidence plus a shallow Graphify query.
+Graph queries use depth 1 and a 500-token output budget;
+agents must stop and report unavailable or failing Graphify tools instead of silently scanning the repository.
+Inspect native Copilot usage statistics in the agent step log and the per-task session log artifacts.
+RTK statistics are output-compression metrics,
+not billing totals.
+See the [reference](../references/improvers-workflow.md#cost-controls-and-inputs) for all limits.
+
+Consumers pinned to an older SHA must update their workflow reference to a release or commit containing these changes before the next execution.
+
 ## Use an organization secret
 
 For several repositories,
@@ -87,6 +132,13 @@ including its Copilot entitlement, premium-request allowance, and expiration.
 Rotate it when its owner changes role or no longer maintains the automation.
 
 ## Troubleshoot a failed run
+
+### The nested job requests a permission that is not allowed
+
+If validation reports `run-improvers is requesting 'issues: write', but is only allowed 'issues: none'`,
+add `issues: write` to the consuming workflow's calling job as shown above.
+Reusable workflows cannot elevate permissions beyond the caller's grants.
+Changing `COPILOT_TOKEN` will not resolve this validation error.
 
 ### Copilot authentication fails
 

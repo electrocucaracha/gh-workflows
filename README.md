@@ -32,7 +32,11 @@ The `<ref>` can point to a release tag or commit SHA.
 Using an immutable reference is recommended when reproducibility and predictable builds are important.
 
 The [workflow catalog](.github/workflows/README.md) provides an overview of the available workflows,
-including their purpose and supported triggers.
+including their purpose,
+supported triggers,
+and [required permissions and secrets](.github/workflows/README.md#reusable-workflow-requirements).
+Grant the documented permissions on each caller job;
+reusable workflows cannot elevate permissions beyond those granted by the caller.
 
 ![Diagram](docs/assets/diagram.png)
 

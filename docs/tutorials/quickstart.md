@@ -8,7 +8,7 @@ nav_order: 1
 
 This tutorial adds the shared improvers workflow to a repository.
 When you finish,
-you can start all three maintenance tasks from the Actions tab or let them run on the monthly schedule.
+you can start the maintenance matrix from the Actions tab or let it run on the monthly schedule.
 
 ## Prerequisites
 
@@ -112,11 +112,19 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     uses: electrocucaracha/gh-workflows/.github/workflows/improvers.yml@main
     secrets: inherit
 ```
 
-This matches the integration used by
+The calling job grants permission to push branches,
+open pull requests,
+and create or update the perspective review issue.
+Omitting `issues: write` makes the reusable workflow invalid,
+even with workflow-level `permissions: read-all`.
+
+For an example consuming repository,
+see
 [`electrocucaracha/ai-prepare-commit-msg`](https://github.com/electrocucaracha/ai-prepare-commit-msg/blob/main/.github/workflows/improvers.yml).
 
 For reproducible automation,
@@ -134,17 +142,21 @@ make lint
 Provide compatible Make targets before enabling the workflow.
 The technical-debt and coverage tasks use `make test`;
 the suppression-review task uses both commands.
+Go coverage is generated automatically.
+For other languages,
+configure coverage generation as described in the [cost controls guide](../how-to-guides/consume-improvers.md#control-cost-and-coverage-evidence).
 
 ## 6. Run and verify
 
 1. Commit and push the workflow and both agent files to the default branch.
 1. Open **Actions** > **Maintenance: codebase Quality Improvements**.
 1. Select **Run workflow**.
-1. Wait for the three matrix jobs to finish.
+1. Wait for the matrix jobs to finish.
 1. Review the pull requests created from `tech-debt-reduction`,
    `remove-ignored-rules`,
    and `increase-code-coverage`.
-1. Open the workflow summary to inspect Copilot CLI, token-saving, and Graphify usage metrics.
+1. Open the workflow summary to inspect the selected model and RTK metrics,
+   and the agent step log for native Copilot usage statistics.
 
 Do not merge generated pull requests without reviewing their changes and validation results.
 

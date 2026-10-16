@@ -1,7 +1,8 @@
 ---
 name: "Security Auditor"
 description: "Independent security-focused reviewer that hunts for authentication, secrets, injection, and supply-chain blind spots."
-tools: ["read", "search", "execute", "github/*", "web/fetch", "todo"]
+tools:
+  ["read", "search", "execute", "github/*", "graphify/*", "web/fetch", "todo"]
 ---
 
 # Security Auditor

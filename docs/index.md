@@ -9,8 +9,11 @@ The improvers workflow runs autonomous, scheduled maintenance tasks against your
 It can reduce technical debt, remove unnecessary lint suppressions,
 and add meaningful tests that improve code coverage.
 
-Each task creates a focused branch and opens a pull request for human review.
-The workflow uses GitHub Copilot CLI custom agents and a Graphify repository map to make changes with codebase context.
+Coding tasks create focused branches and open pull requests for human review.
+The perspective review task files a GitHub issue.
+The workflow uses GitHub Copilot CLI custom agents with bounded evidence prepared by CI,
+an explicit lightweight model,
+and runtime limits to control cost.
 
 ## What you need
 

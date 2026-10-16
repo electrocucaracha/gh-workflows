@@ -28,6 +28,17 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Check agent Graphify access
+      shell: bash
+      env:
+        AGENT: ${{ inputs.agent }}
+      run: |
+        set -euo pipefail
+        if ! awk '/^---$/ { section++; next } section == 1 { print }' ".github/agents/${AGENT}.agent.md" |
+          grep -F '"graphify/*"' >/dev/null; then
+          echo "::error::Refresh .github/agents/${AGENT}.agent.md: its tools allowlist must include \"graphify/*\"."
+          exit 1
+        fi
     - name: Run Copilot CLI agent
       uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
       env:
@@ -36,6 +47,7 @@ runs:
         DEFAULT_BRANCH: ${{ inputs.default-branch }}
       with:
         copilot-token: ${{ inputs.copilot-token }}
+        repo-token: ${{ inputs.github-token }}
         allow-all-tools: true
         denied-tools: "shell(rm:*),shell(sudo:*),shell(chown:*),shell(chmod:777),shell(dd:*)"
         allow-all-paths: true
@@ -44,11 +56,18 @@ runs:
           {
             "mcpServers": {
               "graphify": {
+                "type": "local",
                 "command": "graphify-mcp",
-                "args": ["graphify-out/graph.json"]
+                "args": ["graphify-out/graph.json"],
+                "tools": ["*"]
               }
             }
           }
         agent: ${{ inputs.agent }}
-        prompt: ${{ inputs.prompt }}
+        prompt: |
+          ${{ inputs.prompt }}
+
+          Before inspecting implementation files, call graphify/query_graph with a task-specific question, depth 1, and token_budget 500.
+          If the tool is unavailable or fails, stop and report the failure rather than silently scanning the repository.
+          In your final response, name the Graphify tools actually invoked and how their results informed the work.
         fail-on-error: true

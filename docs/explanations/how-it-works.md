@@ -21,11 +21,22 @@ GitHub resolves the workflow definition from `electrocucaracha/gh-workflows`,
 but `actions/checkout` checks out the repository that initiated the run.
 This behavior is why the custom agent files must be copied into every consuming repository.
 
-## Why Graphify runs first
+## Why CI prepares evidence first
 
-Graphify parses the checked-out code and exposes a repository graph through Model Context Protocol (MCP) tools.
-The prompts direct each agent to use that graph before changing code.
-This gives the agent structural context for dependencies and call paths while avoiding an undirected scan of the entire tree.
+Ordinary CI commands check for existing improvement pull requests,
+collect suppression candidates,
+and generate coverage evidence before starting an agent.
+Each agent receives bounded evidence and a task limited to one improvement rather than a whole-repository audit.
+Eligible tasks also generate a Graphify repository graph.
+The agent makes a shallow,
+budgeted graph query for its selected area before reading implementation files,
+then uses targeted reads rather than retrieving the whole graph.
+The agent's tool allowlist must include `graphify/*`;
+permitting tools to execute automatically does not override an agent's tool availability filter.
+An explicit lightweight model,
+disabled autopilot continuation,
+and runtime limits reduce cost without depending only on compressed tool output.
+The [reference](../references/improvers-workflow.md#cost-controls-and-inputs) describes the limits and coverage configuration.
 
 ## Why each task creates a pull request
 
@@ -37,7 +48,7 @@ and assumptions before accepting generated changes.
 
 The branch names are static.
 The workflow's concurrency setting prevents overlapping runs for the same Git ref,
-but maintainers should merge or close an earlier improvement pull request before rerunning the corresponding task.
+and each coding task skips agent execution while its improvement pull request remains open.
 
 ## Credential boundaries
 
@@ -47,7 +58,12 @@ Two authorization layers are involved:
 - Job permissions authorize repository changes made during the workflow run.
 
 The token owner must have an active Copilot entitlement and the fine-grained token must allow **Copilot Requests**.
-The caller grants only the repository permissions needed to push content and manage pull requests.
+The caller grants `contents: write` to push branches,
+`pull-requests: write` to open pull requests,
+and `issues: write` to create or update the perspective review issue and label.
+These grants belong on the calling job;
+the reusable workflow cannot elevate its caller's permissions.
+The [workflow permission catalog](../../.github/workflows/README.md#job-permissions) lists the requirements for every workflow.
 
 Because Copilot requests count against the token owner's allowance,
 use a deliberately owned automation credential,

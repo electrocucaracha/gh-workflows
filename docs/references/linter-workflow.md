@@ -73,6 +73,20 @@ while denying destructive shell commands
 Its `mcp-config` starts the Graphify MCP server (`graphify-mcp graphify-out/graph.json`),
 so the agent can call `query_graph`, `get_node`, `get_neighbors`,
 and `shortest_path` instead of scanning the checkout blindly.
+The server configuration explicitly sets `type: local` and `tools: ["*"]`.
+The caller's `principal-software-engineer.agent.md` must also include `"graphify/*"` in its tool allowlist;
+`allow-all-tools` grants execution permission but does not override that filter.
+The shared runner rejects an outdated allowlist before invoking Copilot.
+Refresh the caller's agent copy when upgrading the workflow.
+
+The updated Graphify setup action verifies initialization,
+tool discovery,
+and a bounded read-only query.
+The runner asks Copilot to make a task-specific query with depth 1 and a 500-token output budget,
+and to report unavailable or failing tools instead of silently scanning the repository.
+The startup check and `cost.json` are not evidence of actual Copilot tool use;
+verify that in the Copilot tool-call trace.
+Releasing these shared-action fixes requires updating the workflow's pinned `setup-graphify` and `run-copilot-agent` references to a published commit containing them.
 
 The prompt directs the agent to gather its own evidence:
 
