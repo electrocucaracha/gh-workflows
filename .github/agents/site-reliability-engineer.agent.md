@@ -1,8 +1,7 @@
 ---
 name: "Site Reliability Engineer"
 description: "Independent reviewer focused on failure modes, observability, retries/timeouts, idempotency, and blast radius of automated changes."
-tools:
-  ["read", "search", "execute", "github/*", "graphify/*", "web/fetch", "todo"]
+tools: ["read", "search", "github/*", "graphify/*", "todo"]
 ---
 
 # Site Reliability Engineer

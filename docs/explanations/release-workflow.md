@@ -6,12 +6,10 @@ nav_order: 5
 
 # How the release workflow works
 
-The release workflow converts the current repository state into a GitHub
-release.
-It generates or updates `CHANGELOG.md`,
-creates semantic version tags through the changelog tool,
-pushes the release metadata,
-and publishes the newest semantic tag as a GitHub release.
+The release workflow uses two invocations to separate preparation from publication.
+The first generates or updates `CHANGELOG.md` and opens a pull request.
+After that pull request is reviewed and merged,
+a second invocation publishes the corresponding semantic tag and GitHub release.
 
 ## Release flow
 
@@ -21,42 +19,43 @@ and publishes the newest semantic tag as a GitHub release.
 
 Full history is required because changelog generation and semantic tag
 selection depend on repository history.
-The workflow also carries `ai-changelog` notes between runs,
-which lets the changelog tool retain its generated context.
+The changelog generator runs at an immutable commit SHA
+without a write token or persisted Git credentials.
+The workflow does not carry `ai-changelog` Git notes between invocations.
 
 ## Changelog and release boundaries
 
 The changelog tool determines the semantic version and writes the changelog.
-The workflow then selects the newest semantic tag and uses the first three
-changelog sections as the release body.
-The workflow does not infer a release from a pull request label
-or from a separate version input.
+The preparation invocation commits only `CHANGELOG.md` to a release branch
+and opens a pull request against the default branch.
+It does not push tags or create a release.
+The publication invocation must run from the default branch after the pull request is merged;
+it reads the first released version in `CHANGELOG.md` and uses its first three
+sections as the release body.
 
 This design keeps version calculation in one tool
 while leaving publication in the GitHub Actions workflow.
 
 ## Publication safety
 
-The workflow pushes the changelog commit and tags before creating the release.
-It explicitly verifies that the selected tag is available on the remote.
-If that check fails,
-the workflow stops before calling `gh release create`.
-
-Tag pushes are partly best effort because a tag may already exist remotely.
-The remote verification is the decisive check for publication.
+Only the trusted pull-request and explicit `publish: true` steps receive
+write credentials.
+It verifies that the tag does not already exist,
+requires the default branch,
+then pushes the tag and creates the GitHub release.
 
 ## Permission boundary
 
-The release job has `contents: write` because it updates the changelog,
-pushes tags and notes,
-and creates a GitHub release.
-It uses the caller's `GITHUB_TOKEN` for Git authentication
-and for the GitHub CLI release command.
+The workflow requests `contents: write` and `pull-requests: write`.
+The preparation step does not receive the token;
+the credential is exposed only to the trusted pull-request or publication steps.
 
 Release is intentionally a manual path.
-Unlike validation and maintenance schedules,
-it changes the repository's published history and should run only
-when the reviewed state is ready to ship.
+Dispatch `release.yml` to prepare a PR.
+After it is reviewed and merged,
+dispatch `publish-release.yml` from the default branch to publish the release.
+The publishing entry point calls the reusable workflow with `publish: true`;
+neither manual entry point accepts inputs.
 
 ## Related documentation
 

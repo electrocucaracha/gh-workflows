@@ -15,9 +15,10 @@ cleanup:
 	rm -rf .tox/ .venv/
 
 .PHONY: lint
-lint: cleanup
-	sudo -E $(DOCKER_CMD) run --rm -v $$(pwd):/tmp/lint \
+lint:
+	$(DOCKER_CMD) run --platform linux/amd64 --rm -v $$(pwd):/tmp/lint \
 	-e RUN_LOCAL=true \
+	-e DEFAULT_BRANCH=$$(git symbolic-ref --short refs/remotes/origin/HEAD | cut -d/ -f2-) \
 	-e LINTER_RULES_PATH=/ \
 	ghcr.io/super-linter/super-linter
 

@@ -67,6 +67,13 @@ Confirm that the secret name is present without exposing its value:
 gh secret list
 ```
 
+Add an Actions variable named `COPILOT_TOKEN_EXPIRES_AT` with the actual token expiration date in `YYYY-MM-DD` format.
+The scheduled improvers workflow fails if this variable is absent,
+the token expires within 14 days,
+or the declared expiration is more than 90 days away.
+GitHub does not expose a secret's expiration metadata to workflow runs,
+so update the variable whenever the token is rotated.
+
 ## 3. Copy the custom agents
 
 The reusable workflow checks out the target repository before Copilot CLI starts.
@@ -89,7 +96,9 @@ curl -fsSL https://raw.githubusercontent.com/electrocucaracha/gh-workflows/main/
 ```
 
 Review and commit both files.
-The matrix selects `janitor` for cleanup work and `qa-subagent` for coverage work.
+Coding jobs select `janitor` for cleanup work and `qa-subagent` for coverage work.
+The separate perspective-review job also requires all eight reviewer persona files;
+copy them as described in the [improvers setup guide](../how-to-guides/consume-improvers.md#install-the-required-agents).
 
 ## 4. Add the caller workflow
 
@@ -154,7 +163,8 @@ configure coverage generation as described in the [cost controls guide](../how-t
 1. Wait for the matrix jobs to finish.
 1. Review the pull requests created from `tech-debt-reduction`,
    `remove-ignored-rules`,
-   and `increase-code-coverage`.
+   and `increase-code-coverage`,
+   and review the perspective-review issue when that job runs.
 1. Open the workflow summary to inspect the selected model and RTK metrics,
    and the agent step log for native Copilot usage statistics.
 

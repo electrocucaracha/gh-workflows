@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # SPDX-license-identifier: Apache-2.0
 require "fileutils"
 require "json"
@@ -6,8 +7,13 @@ require "tmpdir"
 require "yaml"
 
 workflow = YAML.load_file(File.expand_path("../.github/workflows/improvers.yml", __dir__))
+events = workflow.fetch("on") { workflow.fetch(true) }
+raise "Manual dispatch inputs must remain empty" unless events.fetch("workflow_dispatch") == {}
+raise "Reusable workflow inputs must remain available" unless events.dig("workflow_call", "inputs")&.keys == ["model", "coverage-command", "coverage-report"]
 job = workflow.fetch("jobs").fetch("run-improvers")
 steps = job.fetch("steps")
+review_job = workflow.fetch("jobs").fetch("perspective-review")
+review_steps = review_job.fetch("steps")
 script = steps.find { |step| step["id"] == "evidence" }.fetch("run")
 agent = steps.find { |step| step["id"] == "copilot" }
 raise "Autopilot must be disabled" unless agent.fetch("with").fetch("autopilot") == false
@@ -37,6 +43,52 @@ raise "Shared wrapper MCP configuration differs" unless JSON.parse(wrapper_confi
 raise "Shared wrapper must reject stale agents" unless wrapper.fetch("runs").fetch("steps").first.fetch("run") == guard
 raise "Graphify must precede Copilot" unless steps.index(setup) < steps.index(agent)
 raise "Graphify prompt missing" unless agent.fetch("with").fetch("prompt").include?("call graphify/query_graph")
+raise "Coding jobs must not have issue permissions" if job.fetch("permissions").key?("issues")
+raise "Coding token expiration check missing" unless steps.any? { |step| step.fetch("name", "") == "Validate Copilot token expiration" }
+raise "Review job must not have write access to code or pull requests" unless review_job.fetch("permissions") == { "contents" => "read", "issues" => "write" }
+raise "Review task remains in coding matrix" if job.fetch("strategy").fetch("matrix").fetch("include").any? { |task| task.fetch("id") == "perspective-review" }
+raise "Review token expiration check missing" unless review_steps.any? { |step| step.fetch("name", "") == "Validate Copilot token expiration" }
+review_agent = review_steps.find { |step| step["id"] == "copilot" }.fetch("with")
+raise "Review tools must be allowlisted" unless review_agent.fetch("allow-all-tools") == false && review_agent.fetch("available-tools").include?("github/*")
+raise "Review job must not expose shell execution" if review_agent.fetch("available-tools").include?("execute")
+raise "Review job must not allow arbitrary URLs" unless review_agent.fetch("allow-all-urls") == false && review_agent.fetch("allowed-urls") == "api.github.com,github.com"
+raise "Review must use GitHub MCP issues" unless review_agent.fetch("add-github-mcp-toolsets") == "issues"
+review_personas = %w[
+  accessibility-specialist security-auditor performance-engineer
+  site-reliability-engineer junior-developer technical-writer
+  compliance-reviewer skeptical-staff-engineer
+]
+review_personas.each do |name|
+  path = File.expand_path("../.github/agents/#{name}.agent.md", __dir__)
+  profile = YAML.load(File.read(path).split("---", 3)[1])
+  raise "#{name}: review persona has shell execution" if profile.fetch("tools").include?("execute")
+  raise "#{name}: review persona has web access" if profile.fetch("tools").include?("web/fetch")
+end
+raise "Shared wrapper must disable unrestricted tools" unless wrapper_config.fetch("allow-all-tools") == false
+raise "Shared wrapper must use a tool allowlist" unless wrapper_config.fetch("allowed-tools").include?("shell(rtk git diff)")
+raise "Shared wrapper must restrict paths and URLs" unless wrapper_config.fetch("allow-all-paths") == false && wrapper_config.fetch("allow-all-urls") == false
+raise "Shared wrapper URL allowlist missing" unless wrapper_config.fetch("allowed-urls") == "api.github.com,github.com"
+updater_script = File.read(File.expand_path("update_versions.sh", __dir__))
+raise "Insecure Go installer remains" if updater_script.include?("http://bit.ly/install_pkg")
+raise "Go installer must verify the official checksum" unless updater_script.include?("sha256sum --check")
+raise "gh-updater must be pinned to a commit" unless updater_script.match?(/gh-updater\.git@[0-9a-f]{40}/)
+release_workflow = YAML.load_file(File.expand_path("../.github/workflows/release.yml", __dir__))
+release_events = release_workflow.fetch("on") { release_workflow.fetch(true) }
+raise "Release dispatch inputs must remain empty" unless release_events.fetch("workflow_dispatch") == {}
+raise "Release workflow must retain its publish input" unless release_events.dig("workflow_call", "inputs", "publish", "type") == "boolean"
+release_jobs = release_workflow.fetch("jobs")
+raise "Changelog generation must be read-only" unless release_jobs.fetch("prepare").fetch("permissions") == { "contents" => "read" }
+raise "Release proposal must use pull request permissions" unless release_jobs.fetch("propose").fetch("permissions") == { "contents" => "write", "pull-requests" => "write" }
+raise "Release publication should not create pull requests" unless release_jobs.fetch("publish").fetch("permissions") == { "contents" => "write" }
+prepare_script = release_jobs.fetch("prepare").fetch("steps").find { |step| step["name"] == "Generate changelog" }.fetch("run")
+raise "ai-changelog must be pinned to a commit" unless prepare_script.match?(/ai-changelog\.git@[0-9a-f]{40}/)
+publish_entrypoint = YAML.load_file(File.expand_path("../.github/workflows/publish-release.yml", __dir__))
+publish_events = publish_entrypoint.fetch("on") { publish_entrypoint.fetch(true) }
+raise "Release publication dispatch inputs must remain empty" unless publish_events.fetch("workflow_dispatch") == {}
+raise "Manual release publication must call the reviewed-release workflow" unless publish_entrypoint.dig("jobs", "publish", "uses") == "./.github/workflows/release.yml" && publish_entrypoint.dig("jobs", "publish", "with", "publish") == true
+raise "Release preparation must not push tags" if release_jobs.fetch("propose").fetch("steps").any? { |step| step.fetch("run", "").include?("--follow-tags") }
+zizmor_policy = YAML.load_file(File.expand_path("../zizmor.yaml", __dir__))
+raise "Every action must require hash pins" unless zizmor_policy.dig("rules", "unpinned-uses", "config", "policies") == { "*" => "hash-pin" }
 puts "PASS Graphify configuration, all agent allowlists, and stale caller rejection"
 
 def check_case(script, name, task: "reduce-tech-debt", env: {}, files: {}, eligible: true, success: true)

@@ -67,15 +67,14 @@ The `Run Copilot CLI analysis and file issue` step runs only when the job has
 failed.
 It uses the pinned `austenstone/copilot-cli` action with the
 `principal-software-engineer` agent and `GITHUB_TOKEN` in its environment.
-The action allows the tools and paths needed for diagnosis
-while denying destructive shell commands
-(`rm`, `sudo`, `chown`, `chmod 777`, `dd`).
+The action uses explicit tool and GitHub URL allowlists
+and restricts file access to the checked-out workspace.
 Its `mcp-config` starts the Graphify MCP server (`graphify-mcp graphify-out/graph.json`),
 so the agent can call `query_graph`, `get_node`, `get_neighbors`,
 and `shortest_path` instead of scanning the checkout blindly.
 The server configuration explicitly sets `type: local` and `tools: ["*"]`.
-The caller's `principal-software-engineer.agent.md` must also include `"graphify/*"` in its tool allowlist;
-`allow-all-tools` grants execution permission but does not override that filter.
+The caller's `principal-software-engineer.agent.md` must also include `"graphify/*"` in its tool allowlist.
+The execution allowlist does not override that filter.
 The shared runner rejects an outdated allowlist before invoking Copilot.
 Refresh the caller's agent copy when upgrading the workflow.
 

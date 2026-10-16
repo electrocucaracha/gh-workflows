@@ -57,7 +57,9 @@ Copy both files again when their upstream definitions change.
 Copy the eight reviewer persona definitions from upstream `.github/agents/` as well,
 because `perspective-review` selects one of them at random.
 All participating agents must include `"graphify/*"` in their frontmatter `tools` lists.
-The workflow fails before spending Copilot tokens if the selected caller agent still has an old allowlist.
+Reviewer personas must also include `"github/*"` and must not include `"execute"` or `"web/fetch"`.
+The workflow rejects outdated reviewer profiles before invoking Copilot.
+The workflow fails before spending Copilot tokens if a selected caller agent still has an old allowlist.
 
 ## Change the schedule
 
@@ -129,7 +131,13 @@ Each caller can continue to use `secrets: inherit`.
 
 The token remains tied to the account that generated it,
 including its Copilot entitlement, premium-request allowance, and expiration.
-Rotate it when its owner changes role or no longer maintains the automation.
+Set `COPILOT_TOKEN_EXPIRES_AT` as an Actions variable to its actual expiration date.
+The workflow fails if the date is missing,
+less than 14 days away,
+or more than 90 days away.
+GitHub does not expose the secret's expiration metadata to workflow runs,
+so update the variable whenever the token is rotated.
+Rotate the token when its owner changes role or no longer maintains the automation.
 
 ## Troubleshoot a failed run
 
@@ -145,6 +153,7 @@ Changing `COPILOT_TOKEN` will not resolve this validation error.
 - Confirm that `COPILOT_TOKEN` exists in the consuming repository or is accessible as an organization secret.
 - Confirm that the token owner has an active Copilot subscription.
 - Confirm that the fine-grained token has the account-level **Copilot Requests** permission.
+- Confirm that `COPILOT_TOKEN_EXPIRES_AT` is a valid `YYYY-MM-DD` Actions variable and matches the secret's current expiration date.
 - Confirm that organization policy permits Copilot CLI.
 - Replace expired or revoked tokens.
 

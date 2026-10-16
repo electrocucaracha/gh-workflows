@@ -40,11 +40,13 @@ The [reference](../references/improvers-workflow.md#cost-controls-and-inputs) de
 
 ## Why each task creates a pull request
 
-The agents can write files and push branches,
+Coding agents can write files and push branches,
 but they do not merge directly into the default branch.
 Pull requests provide a review boundary where maintainers can inspect the diff,
 validation results,
 and assumptions before accepting generated changes.
+The perspective reviewer runs in a separate job with `contents: read` and `issues: write`;
+it has no shell execution or web-fetch tools and cannot write code or pull requests.
 
 The branch names are static.
 The workflow's concurrency setting prevents overlapping runs for the same Git ref,
@@ -65,10 +67,14 @@ These grants belong on the calling job;
 the reusable workflow cannot elevate its caller's permissions.
 The [workflow permission catalog](../../.github/workflows/README.md#job-permissions) lists the requirements for every workflow.
 
+The workflow requires a `COPILOT_TOKEN_EXPIRES_AT` Actions variable containing the token's actual expiration date.
+It fails when the date is missing,
+within 14 days,
+or more than 90 days away.
+GitHub does not expose a secret's PAT expiration metadata to the workflow,
+so maintainers must update this variable alongside the secret when rotating it.
 Because Copilot requests count against the token owner's allowance,
-use a deliberately owned automation credential,
-set an expiration,
-and establish a rotation owner.
+use a deliberately owned automation credential and establish a rotation owner.
 
 ## Upstream authentication direction
 

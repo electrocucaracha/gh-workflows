@@ -12,9 +12,9 @@ All except [metrics.yml](./metrics.yml) support reusable workflow calls.
 - Use [metrics.yml](./metrics.yml) to report source lines of code.
 - Use [improvers.yml](./improvers.yml) to run scheduled or manual code-quality improvement tasks.
 - Use [update.yml](./update.yml) to refresh managed dependency versions and open a pull request with the changes.
-- Use [release.yml](./release.yml) to generate release notes,
-  create semantic version tags,
-  and publish a GitHub release.
+- Use [release.yml](./release.yml) to propose release notes in a pull request,
+  then [publish-release.yml](./publish-release.yml) to publish the reviewed
+  semantic version tag and GitHub release.
 
 ## Event map
 
@@ -32,6 +32,7 @@ flowchart TD
     D --> D1[improvers.yml]
     D --> D2[update.yml]
     D --> D3[release.yml]
+    D --> D4[publish-release.yml]
     E --> E1[linter.yml]
     E --> E2[improvers.yml]
     E --> E3[update.yml]
@@ -40,13 +41,14 @@ flowchart TD
 
 ## Workflow reference
 
-| Workflow                         | Responsibilities                                                                                                         | Events                                           |
-| :------------------------------- | :----------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
-| [linter.yml](./linter.yml)       | Runs Super-Linter validation. On failure, gathers diagnostics and asks the Copilot CLI to file or update a GitHub issue. | `push`, `pull_request`, `workflow_call`          |
-| [metrics.yml](./metrics.yml)     | Runs `scc` and reports repository source-line metrics.                                                                   | `push`, `pull_request`                           |
-| [improvers.yml](./improvers.yml) | Runs Copilot-driven tasks for technical debt, ignored-rule cleanup, test coverage, and a perspective review issue.       | `schedule`, `workflow_dispatch`, `workflow_call` |
-| [update.yml](./update.yml)       | Runs `ci/update_versions.sh` and opens a pull request for managed version changes.                                       | `schedule`, `workflow_dispatch`, `workflow_call` |
-| [release.yml](./release.yml)     | Generates an AI-assisted changelog, pushes semantic tags, and creates a GitHub release.                                  | `workflow_dispatch`, `workflow_call`             |
+| Workflow                                     | Responsibilities                                                                                                         | Events                                           |
+| :------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
+| [linter.yml](./linter.yml)                   | Runs Super-Linter validation. On failure, gathers diagnostics and asks the Copilot CLI to file or update a GitHub issue. | `push`, `pull_request`, `workflow_call`          |
+| [metrics.yml](./metrics.yml)                 | Runs `scc` and reports repository source-line metrics.                                                                   | `push`, `pull_request`                           |
+| [improvers.yml](./improvers.yml)             | Runs Copilot-driven tasks for technical debt, ignored-rule cleanup, test coverage, and a perspective review issue.       | `schedule`, `workflow_dispatch`, `workflow_call` |
+| [update.yml](./update.yml)                   | Runs `ci/update_versions.sh` and opens a pull request for managed version changes.                                       | `schedule`, `workflow_dispatch`, `workflow_call` |
+| [release.yml](./release.yml)                 | Proposes an AI-assisted changelog in a pull request, then publishes a reviewed tag and GitHub release on a second run.   | `workflow_dispatch`, `workflow_call`             |
+| [publish-release.yml](./publish-release.yml) | Calls `release.yml` with `publish: true` to publish a reviewed release from the default branch.                          | `workflow_dispatch`                              |
 
 ## Schedule
 
@@ -68,9 +70,9 @@ including permissions needed only on failure or by one matrix entry.
 | :------------------------------- | :--------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [linter.yml](./linter.yml)       | `contents: read`, `issues: write`                          | Checks out source and files or comments on a diagnostic issue after a lint failure on a merged pull request.                                            |
 | [metrics.yml](./metrics.yml)     | `contents: read`                                           | Checks out source for line counting. This is an event-driven workflow, not a reusable workflow; it has no `workflow_call` entry point.                  |
-| [improvers.yml](./improvers.yml) | `contents: write`, `pull-requests: write`, `issues: write` | Pushes improvement branches, opens pull requests, and creates or updates the perspective review issue and its label.                                    |
+| [improvers.yml](./improvers.yml) | `contents: write`, `pull-requests: write`, `issues: write` | Coding and review run in separate jobs; the review job is restricted to `contents: read` and `issues: write`.                                           |
 | [update.yml](./update.yml)       | `contents: write`, `pull-requests: write`                  | Declares these job permissions for branch and pull request updates; its checkout and pull request action authenticate with `WORKFLOW_TOKEN` separately. |
-| [release.yml](./release.yml)     | `contents: write`                                          | Commits the changelog, pushes branches, tags, and Git notes, and creates a GitHub release.                                                              |
+| [release.yml](./release.yml)     | `contents: write`, `pull-requests: write`                  | Opens a changelog PR; a separate reviewed run publishes its tag and GitHub release.                                                                     |
 
 For example,
 an improvers caller must grant all three permissions:
@@ -147,3 +149,6 @@ and skipped work.
   Job-level `permissions` do not change this separately supplied token's scopes.
 - The release workflow uses only `GITHUB_TOKEN`;
   no custom secret is required.
+  Dispatch `release.yml` to propose the changelog,
+  merge that pull request after review,
+  then dispatch `publish-release.yml` from the default branch to publish it.

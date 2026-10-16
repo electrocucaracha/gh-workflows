@@ -24,7 +24,7 @@ nav_order: 3
 The `check-versions` job:
 
 1. Checks out the consuming repository with a persisted `WORKFLOW_TOKEN` credential so the created branch can push and open a pull request.
-1. Installs Go 1.26.0 without dependency caching.
+1. Uses `actions/setup-go` with the workflow's declared Go version and no dependency caching.
 1. Runs `technote-space/create-pr-action`,
    which executes `./ci/update_versions.sh` against the checked-out repository, commits any resulting changes,
    and opens a pull request titled **Upgrade versions files** on a `versions-update-<PR_ID>` branch.
@@ -36,7 +36,8 @@ Every consumer must provide its own executable `ci/update_versions.sh`.
 The script in this repository, used as the reference implementation,
 performs these steps:
 
-1. Installs Go when missing and reads the latest release from `https://golang.org/VERSION`.
+1. Installs Go when missing by downloading the official Linux AMD64 release over HTTPS and verifying its published SHA-256 checksum.
+1. Reads the latest release from `https://go.dev/VERSION`.
 1. Rewrites every `go-version:` entry under `.github/workflows` to the latest minor Go release.
 1. Installs `uv` when missing and runs `uvx pre-commit autoupdate` to refresh `.pre-commit-config.yaml` hooks.
 1. Collects every distinct `uses: <action>@<ref>` reference under `.github`.
@@ -46,6 +47,7 @@ performs these steps:
 1. Applies a stricter `v`-prefixed tag pattern to actions listed in `exceptions`,
    and a permissive pattern to every other action.
 1. Runs `make fmt` on exit through a `trap`, even when an earlier step fails.
+1. Installs `gh-updater` from a pinned commit SHA rather than the moving default branch.
 
 Adapt the exceptions, pinned actions,
 and version-file discovery to the consuming repository's own workflow layout.
