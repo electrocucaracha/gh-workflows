@@ -9,6 +9,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [12.0.1] - 2026-10-16
+
+### Changed
+
+- Enabled jscpd ignore markers around shared agent configuration instructions to prevent duplicate code detection tools from flagging these sections, maintaining a clean code health report while preserving necessary guidance for each agent type. [e171e202](https://github.com/electrocucaracha/gh-workflows/commit/e171e202dcee30a16fc1b8fb67f22c2e9ea3a06d)
+
+## [12.0.0] - 2026-10-16
+
+### Removed
+
+- Simplified the publish-release workflow configuration to use a "$" path for variable substitution compatibility and removed the unnecessary YAML document start marker from the .yaml-lint.yml file for cleaner formatting, resulting in no observable impact on users or maintainers. [1b56d09c](https://github.com/electrocucaracha/gh-workflows/commit/1b56d09cb5c798dec4d7ee3ad7b7bdec525707c3)
+
+## [11.0.3] - 2026-10-15
+
+### Changed
+
+- Restructured the release workflow to use a two-step process, introducing a separate job for changelog proposal and publication, and hardened the environment with stricter permission boundaries and immutable tool versions. [e2b5f7be](https://github.com/electrocucaracha/gh-workflows/commit/e2b5f7bedfe0d9dcc145cc557ba40e0bbcf5be60)
+
+## [11.0.2] - 2026-10-15
+
+### Changed
+
+- Optimized GitHub Actions workflows to leverage the latest upstream improvements and bugfixes, thereby enhancing workflow reliability and maintaining security. [f5204d41](https://github.com/electrocucaracha/gh-workflows/commit/f5204d41ab9dbb6afaafd995bb06f59c937818bd)
+
+## [11.0.1] - 2026-10-15
+
+### Changed
+
+- Simplified configuration for code quality checks and formatting to ignore additional directories and combine ignored code checks into a single flag. [35624e91](https://github.com/electrocucaracha/gh-workflows/commit/35624e91e0f4494946237f99efbf6de772f75420)
+
+## [11.0.0] - 2026-10-15
+
+### Removed
+
+- Optimized project configuration by disabling unnecessary rule suppressions, allowing users to re-enable previously disabled rules in the .yaml-lint.yml file. [808bc224](https://github.com/electrocucaracha/gh-workflows/commit/808bc2248e4d6d173eb982c9a4275823fe53fb4d)
+
+## [10.0.0] - 2026-10-15
+
+### Removed
+
+- Simplified the configuration to allow GitHub Actions' on: trigger key to be parsed as a boolean by enabling the editorconfig-checker Charset rule and introducing a shared yamllint config, making redundant inline suppressions safe to delete. [73785c4b](https://github.com/electrocucaracha/gh-workflows/commit/73785c4bc0b25bebff2e75dd8195b6328052e3af)
+
+## [9.5.3] - 2026-10-15
+
+### Changed
+
+- Simplified lint tooling configuration to prevent pre-commit hook failures by resolving issues with bashate and jscpd checks. [1ac0a9cc](https://github.com/electrocucaracha/gh-workflows/commit/1ac0a9cca5644c7d16831a02fa8a78251094420b)
+
+## [9.5.2] - 2026-10-15
+
+### Changed
+
+- Optimized the improvers workflow to strictly control copilot runs, require explicit agent allowlisting for graphify tools, and bound all inputs to prevent unintentional repository-wide audits, while also preparing task-specific evidence and enforcing agent allowlist checks. [76f8dc99](https://github.com/electrocucaracha/gh-workflows/commit/76f8dc99b12f27d25cc1b136e9beb0b88fd4c5b7)
+
+## [9.5.1] - 2026-10-15
+
+### Changed
+
+- Updated the pre-commit configuration to utilize the latest version of the ai-prepare-commit-msg hook, v20.3.4, which incorporates upstream fixes and improvements. [50a6dd6e](https://github.com/electrocucaracha/gh-workflows/commit/50a6dd6ecfb6282bf3a8004e076e1bbe8dfcb6f8)
+
+## [9.5.0] - 2026-10-11
+
+### Added
+
+- Detailed release notes for releases 9.1.1 through 9.4.4 have been documented in CHANGELOG.md, enhancing project documentation and providing clear historical tracking for future reference. [23cf43f7](https://github.com/electrocucaracha/gh-workflows/commit/23cf43f70d2860f0aa106bec7abfafc1df36e8f5)
+
 ## [9.4.4] - 2026-10-11
 
 ### Changed
