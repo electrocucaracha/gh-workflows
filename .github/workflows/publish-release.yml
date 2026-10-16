@@ -15,6 +15,6 @@ permissions:
   pull-requests: write
 jobs:
   publish:
-    uses: ./.github/workflows/release.yml
+    uses: $/.github/workflows/release.yml
     with:
       publish: true
