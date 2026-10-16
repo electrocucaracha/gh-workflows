@@ -146,9 +146,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Install RTK token saver
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@0df06b4e1880bf64e290783ddbfe850f849a27af # v9.4.1
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@a3c043874dc247ce98753c63f0cded0e4a9cb8a2 # v9.4.4
       - name: Generate repository map with Graphify
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@0df06b4e1880bf64e290783ddbfe850f849a27af # v9.4.1
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@a3c043874dc247ce98753c63f0cded0e4a9cb8a2 # v9.4.4
       - name: Select a random reviewer persona
         id: persona
         if: matrix.id == 'perspective-review'
@@ -174,7 +174,7 @@ jobs:
           echo "role=${role}" >> "$GITHUB_OUTPUT"
           echo "Selected persona: ${role} (${agent})"
       - name: Run Copilot CLI improvement agent
-        uses: electrocucaracha/gh-workflows/.github/actions/run-copilot-agent@0df06b4e1880bf64e290783ddbfe850f849a27af # v9.4.1
+        uses: electrocucaracha/gh-workflows/.github/actions/run-copilot-agent@a3c043874dc247ce98753c63f0cded0e4a9cb8a2 # v9.4.4
         with:
           copilot-token: ${{ secrets.COPILOT_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
