@@ -57,12 +57,12 @@ jobs:
           DEFAULT_BRANCH: ${{ github.head_ref || github.ref_name }}
       - name: Install RTK token saver
         if: always()
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@76f8dc99b12f27d25cc1b136e9beb0b88fd4c5b7 # v9.5.2
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@e171e202dcee30a16fc1b8fb67f22c2e9ea3a06d # v12.0.1
       - name: Generate repository map with Graphify
         if: failure()
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@76f8dc99b12f27d25cc1b136e9beb0b88fd4c5b7 # v9.5.2
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@e171e202dcee30a16fc1b8fb67f22c2e9ea3a06d # v12.0.1
       - name: Run Copilot CLI analysis and file issue
-        uses: electrocucaracha/gh-workflows/.github/actions/run-copilot-agent@76f8dc99b12f27d25cc1b136e9beb0b88fd4c5b7 # v9.5.2
+        uses: electrocucaracha/gh-workflows/.github/actions/run-copilot-agent@e171e202dcee30a16fc1b8fb67f22c2e9ea3a06d # v12.0.1
         id: ai-linter-analysis
         if: failure() && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         with:
