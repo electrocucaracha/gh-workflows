@@ -18,7 +18,7 @@ or a caller can invoke its reusable `workflow_call` entry point.
 
 [Open the editable linter diagram](../assets/linter-workflow.drawio)
 
-The workflow separates validation from diagnosis.
+The workflow separates validation from repair.
 Super-Linter determines whether checks pass.
 The later steps preserve the evidence needed to understand a failure
 and create a durable record for maintainers.
@@ -35,63 +35,49 @@ variables for one caller.
 It is an escape hatch for repository differences,
 not a replacement for committed linter configuration.
 
-## The agent gathers its own evidence
+## Preserve logs for later repair
 
-Earlier revisions of this workflow ran separate steps to capture the
-changed-file diff, parse Super-Linter's JSON output, and assemble a
-machine-readable report before an issue-filing action could run.
-The Copilot CLI action can already run shell commands,
-so those preparation steps duplicated work the agent could do itself.
+When Super-Linter fails,
+the workflow reads its saved output and selects JSON records with nonzero `Exitval`.
+Each record keeps its original fields,
+including any command and diagnostic messages.
+The output file path identifies the source of each group of entries.
+If structured failures are unavailable,
+the reporter falls back to raw output.
 
-When validation fails,
-the workflow now runs a single Copilot CLI step
-using the pinned `austenstone/copilot-cli` action with the repository's
-`principal-software-engineer` agent.
-The prompt tells the agent to inspect `./super-linter-output` for structured
-JSON diagnostics or raw log files,
-and to run `git diff` itself against the full history the checkout provides.
-The linter output remains authoritative;
-the AI response is advisory and should be reviewed before anyone applies it.
+The workflow does not generate a repository map or invoke an AI agent.
+Its responsibility ends at recording evidence;
+a separate repair skill can diagnose and fix the failure later.
 
-Before that step runs,
-the workflow sets up `uv` and generates a Graphify repository map,
-the same code-only, no-viz map the improvers workflow builds.
-Both steps only run on failure,
-so a passing run never pays for a map nobody will read.
-The Copilot CLI step then starts Graphify as an MCP server,
-so the agent can query the graph for related files and callers instead of
-guessing from a directory listing.
-
-The workflow initializes `rtk` before analysis
-and records Copilot CLI, `rtk`, and Graphify usage metrics in the Actions job summary.
-
-## Why the agent files its own issue
+## Why failures become issues
 
 A GitHub issue is a durable handoff from CI to maintenance work.
 It preserves the failure summary after the transient workflow log becomes
 harder to find and gives maintainers a place to track the repair.
 The `super-linter-issue` label makes these reports discoverable.
 
-Rather than pass a prepared report to a separate issue-filing action,
-the prompt gives the Copilot CLI step the `GITHUB_TOKEN` it needs to run the
-`gh` CLI directly.
-The agent searches for an existing open issue with the `super-linter-issue`
-label and title before deciding whether to comment on it or open a new one,
+The reporter uses the `gh` CLI with `GITHUB_TOKEN`.
+It searches for an existing open issue with the `super-linter-issue` label
+and title `super-linter GitHub action has failed`
+before deciding whether to comment on it or open a new one,
 so repeated failures update one issue instead of creating duplicates.
 
-This step runs only after the job has failed.
+Each report includes the commit SHA and workflow run attempt URL.
+Reports that exceed the issue size budget are truncated with a notice,
+so the workflow logs remain the source for complete evidence.
+
+This step runs only after Super-Linter has failed.
 Successful validation does not create maintenance noise.
 
 ## Permission and secret boundary
 
 The workflow needs `contents: read` to inspect the repository
-and `issues: write` so the `GITHUB_TOKEN` it hands to the Copilot CLI step can
-create or comment on issues.
-The caller also supplies the required `COPILOT_TOKEN` secret,
-which authenticates the Copilot CLI action itself.
+and `issues: write` so its `GITHUB_TOKEN` can create or comment on issues.
+Fork pull request runs skip issue reporting because their token is read-only.
 The workflow passes the caller's `GITHUB_TOKEN` to Super-Linter
-and to the Copilot CLI step,
-but the Copilot CLI action authenticates with `COPILOT_TOKEN`.
+and to the reporter as `GH_TOKEN`.
+No custom secret is required;
+the optional `COPILOT_TOKEN` declaration only preserves compatibility for existing callers.
 
 ## Related documentation
 

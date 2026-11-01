@@ -41,14 +41,14 @@ flowchart TD
 
 ## Workflow reference
 
-| Workflow                                     | Responsibilities                                                                                                         | Events                                           |
-| :------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
-| [linter.yml](./linter.yml)                   | Runs Super-Linter validation. On failure, gathers diagnostics and asks the Copilot CLI to file or update a GitHub issue. | `push`, `pull_request`, `workflow_call`          |
-| [metrics.yml](./metrics.yml)                 | Runs `scc` and reports repository source-line metrics.                                                                   | `push`, `pull_request`                           |
-| [improvers.yml](./improvers.yml)             | Runs Copilot-driven tasks for technical debt, ignored-rule cleanup, test coverage, and a perspective review issue.       | `schedule`, `workflow_dispatch`, `workflow_call` |
-| [update.yml](./update.yml)                   | Runs `ci/update_versions.sh` and opens a pull request for managed version changes.                                       | `schedule`, `workflow_dispatch`, `workflow_call` |
-| [release.yml](./release.yml)                 | Proposes an AI-assisted changelog in a pull request, then publishes a reviewed tag and GitHub release on a second run.   | `workflow_dispatch`, `workflow_call`             |
-| [publish-release.yml](./publish-release.yml) | Calls `release.yml` with `publish: true` to publish a reviewed release from the default branch.                          | `workflow_dispatch`                              |
+| Workflow                                     | Responsibilities                                                                                                       | Events                                           |
+| :------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
+| [linter.yml](./linter.yml)                   | Runs Super-Linter validation. On failure, files or updates a GitHub issue with failed log entries for later repair.    | `push`, `pull_request`, `workflow_call`          |
+| [metrics.yml](./metrics.yml)                 | Runs `scc` and reports repository source-line metrics.                                                                 | `push`, `pull_request`                           |
+| [improvers.yml](./improvers.yml)             | Runs Copilot-driven tasks for technical debt, ignored-rule cleanup, test coverage, and a perspective review issue.     | `schedule`, `workflow_dispatch`, `workflow_call` |
+| [update.yml](./update.yml)                   | Runs `ci/update_versions.sh` and opens a pull request for managed version changes.                                     | `schedule`, `workflow_dispatch`, `workflow_call` |
+| [release.yml](./release.yml)                 | Proposes an AI-assisted changelog in a pull request, then publishes a reviewed tag and GitHub release on a second run. | `workflow_dispatch`, `workflow_call`             |
+| [publish-release.yml](./publish-release.yml) | Calls `release.yml` with `publish: true` to publish a reviewed release from the default branch.                        | `workflow_dispatch`                              |
 
 ## Schedule
 
@@ -68,7 +68,7 @@ including permissions needed only on failure or by one matrix entry.
 
 | Workflow                         | Required job permissions                                   | Purpose                                                                                                                                                 |
 | :------------------------------- | :--------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [linter.yml](./linter.yml)       | `contents: read`, `issues: write`                          | Checks out source and files or comments on a diagnostic issue after a lint failure on a merged pull request.                                            |
+| [linter.yml](./linter.yml)       | `contents: read`, `issues: write`                          | Checks out source and files or comments on a log-only issue after Super-Linter fails; fork pull requests skip reporting.                                |
 | [metrics.yml](./metrics.yml)     | `contents: read`                                           | Checks out source for line counting. This is an event-driven workflow, not a reusable workflow; it has no `workflow_call` entry point.                  |
 | [improvers.yml](./improvers.yml) | `contents: write`, `pull-requests: write`, `issues: write` | Coding and review run in separate jobs; the review job is restricted to `contents: read` and `issues: write`.                                           |
 | [update.yml](./update.yml)       | `contents: write`, `pull-requests: write`                  | Declares these job permissions for branch and pull request updates; its checkout and pull request action authenticate with `WORKFLOW_TOKEN` separately. |
@@ -120,7 +120,7 @@ Provide the required secret for the workflow you call:
 
 | Workflow                         | Required secret  | Optional input                                 |
 | :------------------------------- | :--------------- | :--------------------------------------------- |
-| [linter.yml](./linter.yml)       | `COPILOT_TOKEN`  | `validate_overrides`                           |
+| [linter.yml](./linter.yml)       | None             | `validate_overrides`                           |
 | [improvers.yml](./improvers.yml) | `COPILOT_TOKEN`  | `model`, `coverage-command`, `coverage-report` |
 | [update.yml](./update.yml)       | `WORKFLOW_TOKEN` | None                                           |
 | [release.yml](./release.yml)     | None             | None                                           |

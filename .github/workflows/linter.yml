@@ -22,7 +22,8 @@ on:
         default: "{}"
     secrets:
       COPILOT_TOKEN:
-        required: true
+        description: "Deprecated and unused; accepted for existing callers."
+        required: false
 permissions:
   contents: read
 jobs:
@@ -55,83 +56,88 @@ jobs:
           SAVE_SUPER_LINTER_OUTPUT: true
           KUBERNETES_KUBECONFORM_OPTIONS: "-ignore-missing-schemas"
           DEFAULT_BRANCH: ${{ github.head_ref || github.ref_name }}
-      - name: Install RTK token saver
-        if: always()
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@8f0fa8c0acf90de07569a66d774498c3101d235f # v12.1.1
-      - name: Generate repository map with Graphify
-        if: failure()
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@8f0fa8c0acf90de07569a66d774498c3101d235f # v12.1.1
-      - name: Run Copilot CLI analysis and file issue
-        uses: electrocucaracha/gh-workflows/.github/actions/run-copilot-agent@8f0fa8c0acf90de07569a66d774498c3101d235f # v12.1.1
-        id: ai-linter-analysis
-        if: failure() && github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          agent: principal-software-engineer
-          prompt: |
-            You are an expert software engineer who specializes in diagnosing and fixing software build and runtime failures.
-
-            Task: The Super-Linter step of this workflow run failed. Gather your own evidence, diagnose the root cause, and file (or update) a GitHub issue with the results.
-
-            Gather evidence yourself, using the shell and MCP tools available to you:
-            - Token-efficient shell usage: prefix shell commands with `rtk` so command output is compressed, for example `rtk git diff` and `rtk gh issue list`.
-            - Repository structure: the generated Graphify graph is already built; use the Graphify MCP tools (query_graph, get_node, get_neighbors, shortest_path) to navigate the codebase instead of scanning the tree blindly.
-            - Structured diagnostics: find JSON files under ./super-linter-output whose "Exitval" field is non-zero; each one names the failing linter, file, and line.
-            - Raw output: if no structured JSON errors exist, inspect the non-JSON files under ./super-linter-output for the failure details.
-            - Code diff: run `rtk git diff` (the checkout has full history, fetch-depth 0) against the base of this branch/PR to see what changed.
-
-            Diagnosis body format:
-            ## Summary
-            One or two plain-language sentences stating what broke (which linter(s), how many files) so a reader can grasp the failure without reading further.
-
-            ## Diagnosis
-            State the most likely root cause and cite the linter, file, line, and message.
-
-            ## Fix Now
-            Give the smallest concrete fix that resolves this failure today. Include a unified diff only when the change is unambiguous.
-
-            ## Verification
-            Name the command or workflow check that should confirm the fix.
-
-            ## Copilot Prompt
-            Emit a single fenced ```text block containing a self-contained, copy-paste prompt for a coding agent (GitHub Copilot) running inside this repository.
-            The prompt must name the exact files and line numbers to edit, restate the linter rule IDs being violated, describe the expected end state, and end with the verification command. Do not reference this issue or any external context the agent cannot read.
-
-            ## Prevent Recurrence
-            Recommend one durable safeguard so this class of failure does not recur, chosen from: a linter config change (with the file path and setting), a pre-commit hook entry, an editorconfig or formatter rule, or a workflow guard. Give the concrete snippet and where it goes. If the failure was a one-off with no reasonable safeguard, say so explicitly instead of inventing one.
-
-            If the evidence is insufficient, say exactly what is missing and point to the relevant workflow log section instead of inventing a cause. Never file an issue containing only generic or placeholder text; every section must reference concrete evidence you gathered.
-
-            Issue filing:
-            - Use the `gh` CLI through RTK, for example `rtk gh issue list` and `rtk gh issue create` (GITHUB_TOKEN is set in the environment), against repository ${{ github.repository }}.
-            - Search for an existing open issue labeled "super-linter-issue" titled "super-linter GitHub action has failed".
-            - If one exists, add a comment to it with the diagnosis body above. Otherwise create a new issue with that title and label.
-            - Prepend the diagnosis body with a link to this run's logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      - name: Collect Copilot usage metrics
-        if: always()
+      - name: File issue with failed linter logs
+        id: linter-issue
+        if: failure() && steps.linter-validation.outcome == 'failure' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         env:
-          NO_COLOR: "1"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
-          {
-            echo "## Copilot CLI Usage Metrics"
-            echo
-            echo "### ccusage"
-            echo '```'
-            npx -y ccusage@latest copilot daily 2>&1 || echo "ccusage reported no Copilot CLI usage data for this run."
-            echo '```'
-            echo
-            echo "### rtk stats"
-            echo '```'
-            rtk gain 2>&1 || echo "rtk reported no usage data for this run."
-            echo '```'
-            echo
-            echo "### Graphify usage"
-            echo '```'
-            if [ -f graphify-out/cost.json ]; then
-              jq . graphify-out/cost.json 2>&1 || cat graphify-out/cost.json
-            else
-              echo "Graphify reported no usage/cost data for this run."
-            fi
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          set -euo pipefail
+
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from textwrap import indent
+
+          MAX_LOG_BYTES = 60_000
+
+
+          def failed_entries(value):
+              if isinstance(value, dict):
+                  if value.get("Exitval") not in (None, 0, "0", "0.0"):
+                      yield value
+                  else:
+                      for nested in value.values():
+                          yield from failed_entries(nested)
+              elif isinstance(value, list):
+                  for nested in value:
+                      yield from failed_entries(nested)
+
+
+          structured = []
+          raw = []
+          output = Path("super-linter-output")
+          paths = sorted(output.rglob("*")) if not output.is_symlink() else []
+          for path in paths:
+              if not path.is_file() or path.is_symlink():
+                  continue
+              text = path.read_text(encoding="utf-8", errors="replace")
+              if path.suffix.lower() == ".json":
+                  try:
+                      entries = list(failed_entries(json.loads(text)))
+                  except json.JSONDecodeError:
+                      raw.append((path, text))
+                      continue
+                  if entries:
+                      structured.append((path, json.dumps(entries, indent=2, ensure_ascii=False)))
+              elif text.strip():
+                  raw.append((path, text))
+
+          sections = [
+              f"Workflow run: {os.environ['RUN_URL']}",
+              f"Commit: {os.environ['COMMIT_SHA']}",
+              "## Failed linter logs",
+          ]
+          logs = structured or raw
+          for path, text in logs:
+              sections.append(f"### {path}\n\n{indent(text.rstrip(), '    ')}")
+          if not logs:
+              sections.append(
+                  "Super-Linter did not save diagnostic entries. "
+                  "See the workflow run above for the failed step's logs."
+              )
+          body = "\n\n".join(sections) + "\n"
+          encoded = body.encode("utf-8")
+          if len(encoded) > MAX_LOG_BYTES:
+              body = encoded[:MAX_LOG_BYTES].decode("utf-8", errors="ignore")
+              body += "\n\nLog entries truncated; see the workflow run above for the full logs.\n"
+          report_path = Path(os.environ["RUNNER_TEMP"]) / "linter-issue.md"
+          report_path.write_text(body, encoding="utf-8")
+          PY
+
+          gh api "repos/$GH_REPO/labels/super-linter-issue" > /dev/null ||
+            gh label create super-linter-issue --description "Super-Linter failures awaiting repair" --color B60205
+          issue_number=$(gh issue list --state open --label super-linter-issue \
+            --search '"super-linter GitHub action has failed" in:title' \
+            --json number,title \
+            --jq 'map(select(.title == "super-linter GitHub action has failed"))[0].number // empty')
+          if [ -n "$issue_number" ]; then
+            gh issue comment "$issue_number" --body-file "$RUNNER_TEMP/linter-issue.md"
+          else
+            gh issue create --title "super-linter GitHub action has failed" \
+              --label super-linter-issue --body-file "$RUNNER_TEMP/linter-issue.md"
+          fi

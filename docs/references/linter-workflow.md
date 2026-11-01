@@ -14,8 +14,8 @@ nav_order: 2
 | Reusable entry point | `workflow_call`                      |
 | Direct entry points  | `push`, `pull_request`               |
 | Runner               | `ubuntu-latest`                      |
-| Super-Linter         | `super-linter/super-linter` `v8.7.0` |
-| Required secret      | `COPILOT_TOKEN`                      |
+| Super-Linter         | `super-linter/super-linter` `v9.0.0` |
+| Required secret      | None                                 |
 | Required permissions | `contents: read`, `issues: write`    |
 
 ## Input
@@ -48,65 +48,40 @@ The Super-Linter step uses these settings:
 | `DEFAULT_BRANCH`                 | Head ref or ref name      | Selects the comparison branch for the run.                    |
 
 The workflow passes `GITHUB_TOKEN` to Super-Linter for GitHub integration.
-It passes the required `COPILOT_TOKEN`,
-plus `GITHUB_TOKEN`,
-to the Copilot CLI analysis step.
+The issue-reporting step uses the same token through `GH_TOKEN`.
+`COPILOT_TOKEN` is optional and unused,
+retained only for compatibility with existing callers.
 
 ## Failure handling
 
-The workflow installs and initializes `rtk` on every run so that the Copilot
-CLI can use its token-saving integration.
+The `File issue with failed linter logs` step runs when Super-Linter fails,
+not when an unrelated step fails.
+It runs on pushes and same-repository pull requests,
+including reusable workflow calls.
+Fork pull requests skip issue reporting because their token is read-only.
 
-When the job has failed,
-the workflow also sets up `uv` and generates a Graphify repository map
-(`graphify . --no-viz --code-only`) before the Copilot CLI step runs.
-These two steps are skipped on a successful run,
-since nothing needs diagnosing.
+The reporter recursively reads `./super-linter-output`.
+It includes JSON records whose `Exitval` is nonzero,
+preserving each record's fields and the output file path.
+Successful JSON records are excluded.
+If no failed JSON records exist,
+the reporter includes raw logs and any invalid JSON output instead.
+If no diagnostics were saved,
+the issue explains that the workflow logs must be inspected.
 
-The `Run Copilot CLI analysis and file issue` step runs only when the job has
-failed.
-It uses the pinned `austenstone/copilot-cli` action with the
-`principal-software-engineer` agent and `GITHUB_TOKEN` in its environment.
-The action uses explicit tool and GitHub URL allowlists
-and restricts file access to the checked-out workspace.
-Its `mcp-config` starts the Graphify MCP server (`graphify-mcp graphify-out/graph.json`),
-so the agent can call `query_graph`, `get_node`, `get_neighbors`,
-and `shortest_path` instead of scanning the checkout blindly.
-The server configuration explicitly sets `type: local` and `tools: ["*"]`.
-The caller's `principal-software-engineer.agent.md` must also include `"graphify/*"` in its tool allowlist.
-The execution allowlist does not override that filter.
-The shared runner rejects an outdated allowlist before invoking Copilot.
-Refresh the caller's agent copy when upgrading the workflow.
+The issue body contains the workflow run attempt URL,
+commit SHA,
+and failed log entries without AI analysis or suggested fixes.
+Oversized log output is truncated at 60,000 UTF-8 bytes,
+with a notice pointing to the full workflow logs.
+A repair skill can use this evidence later.
 
-The updated Graphify setup action verifies initialization,
-tool discovery,
-and a bounded read-only query.
-The runner asks Copilot to make a task-specific query with depth 1 and a 500-token output budget,
-and to report unavailable or failing tools instead of silently scanning the repository.
-The startup check and `cost.json` are not evidence of actual Copilot tool use;
-verify that in the Copilot tool-call trace.
-Releasing these shared-action fixes requires updating the workflow's pinned `setup-graphify` and `run-copilot-agent` references to a published commit containing them.
-
-The prompt directs the agent to gather its own evidence:
-
-| Evidence               | How the agent collects it                                                       |
-| :--------------------- | :------------------------------------------------------------------------------ |
-| Repository structure   | Query the pre-built Graphify graph via the MCP tools.                           |
-| Structured diagnostics | Find JSON files under `./super-linter-output` whose `Exitval` is non-zero.      |
-| Raw output             | Inspect non-JSON files under `./super-linter-output` when no JSON errors exist. |
-| Code diff              | Run `git diff` against the full history the checkout provides.                  |
-
-The requested response contains six sections: a plain-language summary,
-diagnosis, a fix that resolves the failure now,
-a verification command, an agent-ready prompt,
-and a recommendation to prevent recurrence.
-The agent then uses the `gh` CLI to search for an existing open issue
-labeled `super-linter-issue` and titled
-`super-linter GitHub action has failed`.
-It comments on that issue if one exists, or creates a new one with that title
-and label, prepending a link to the current run's logs.
-
-Every run adds Copilot CLI, `rtk`, and Graphify usage metrics to the Actions job summary.
+The reporter uses `gh` to find an open issue labeled `super-linter-issue`
+and titled `super-linter GitHub action has failed`.
+It comments on that issue if one exists,
+or creates a new issue with that title and label.
+The label is created if missing.
+GitHub API errors fail the reporting step rather than silently discarding the report.
 
 ## Source links
 

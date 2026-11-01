@@ -33,7 +33,6 @@ jobs:
       issues: write
     with:
       validate_overrides: "{}"
-    secrets: inherit
 ```
 
 The `workflow_call` entry point is invoked by the caller's job.
@@ -41,14 +40,11 @@ Triggers such as `push`, `pull_request`, and `workflow_dispatch` belong in the
 caller workflow.
 
 The `contents: read` permission lets checkout read the repository.
-The `issues: write` permission lets the `GITHUB_TOKEN` handed to the Copilot
-CLI step create or comment on a failed-build issue.
-The inherited `COPILOT_TOKEN` secret lets the workflow run its Copilot CLI
-failure analysis.
-
-The reusable workflow declares `COPILOT_TOKEN` as required.
-Use `secrets: inherit` when the secret exists in the caller repository
-or organization.
+The `issues: write` permission lets the issue-reporting step create or comment
+on a failed-linter issue using the automatically supplied `GITHUB_TOKEN`.
+No custom secret is required.
+Existing callers may still pass `COPILOT_TOKEN`,
+but the workflow no longer uses it.
 
 ## Pin the reusable workflow
 
@@ -83,25 +79,20 @@ files from the checked-out workspace.
 
 ## Inspect a failed run
 
-When a linter fails, the workflow generates a Graphify repository map, then
-runs a single Copilot CLI step that:
+When Super-Linter fails,
+the workflow creates an issue titled `super-linter GitHub action has failed`
+with the `super-linter-issue` label,
+or comments on the existing open issue with that title and label.
+The report contains failed JSON records with nonzero `Exitval`,
+or raw logs when no failed JSON records are available.
+It also includes the commit SHA and a link to the workflow run attempt.
 
-1. Queries the Graphify MCP server for repository structure instead of
-   scanning the checkout blindly.
-1. Inspects `./super-linter-output` for structured JSON diagnostics or, when
-   none exist, the raw Super-Linter logs.
-1. Runs `git diff` against the full history the checkout provides.
-1. Produces a diagnosis, fix, verification command, agent-ready prompt, and
-   prevention recommendation.
-1. Uses the `gh` CLI to comment on an existing `super-linter-issue` issue, or
-   create one, with the results.
-
-The workflow also publishes Copilot CLI, `rtk`, and Graphify usage metrics
-in the Actions job summary.
-
-Open the failed workflow run to review the complete Super-Linter log and the
-generated issue.
-The AI response is advisory; review every proposed change before merging it.
+No AI analysis runs in this workflow.
+A repair skill can consume the issue later.
+Open the linked workflow run for the complete logs if the report is truncated
+or Super-Linter did not save diagnostics.
+Fork pull requests still run validation,
+but skip issue reporting because their token is read-only.
 
 ## Verify the caller
 
