@@ -9,6 +9,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [13.3.1] - 2026-11-06
+
+### Fixed
+
+- Improved diagnostic summaries reported to issues by stripping ANSI terminal escapes and excluding non-diagnostic JSON metadata, resulting in clearer and more readable output. [eaf817d5](https://github.com/electrocucaracha/gh-workflows/commit/eaf817d527a52410bd6e85ad08a5acbd2039ae3a)
+
+## [13.3.0] - 2026-11-06
+
+### Added
+
+- Enabled a debug input in the version update workflow, allowing maintainers to opt-in to shell tracing in the script for trusted runs, with tracing disabled by default in scheduled runs. [6691c235](https://github.com/electrocucaracha/gh-workflows/commit/6691c2356bb4e6d2884361dd45d16dd23d1b6682)
+
+## [13.2.0] - 2026-11-06
+
+### Added
+
+- Enabled automatic review requests for designated maintainers by introducing a CODEOWNERS file that notifies @electrocucaracha for review on all pull requests modifying code they own. [e9ab3de8](https://github.com/electrocucaracha/gh-workflows/commit/e9ab3de8b687cdf1475bc58cf0cdbf630c5419e3)
+
+## [13.1.3] - 2026-11-06
+
+### Changed
+
+- Updated dependencies to newer versions, specifically setup-rtk and setup-graphify were updated to v13.1.1, and setup-ollama was updated to v2.1.17, with no breaking behavior or security impact introduced. [a41b3613](https://github.com/electrocucaracha/gh-workflows/commit/a41b361343bea6f8ee30109e5fa54d943d1b6be7)
+
+## [13.1.2] - 2026-11-06
+
+### Changed
+
+- Updated dependencies in GitHub workflows to versions v13.1.1 for RTK token saver and Graphify setup actions, and to v2.1.17 for Ollama setup action, without introducing breaking behavior or requiring migrations. [fe98451b](https://github.com/electrocucaracha/gh-workflows/commit/fe98451b144609935c34ed0f980a65cdf971e972)
+
+## [13.1.1] - 2026-11-03
+
+### Changed
+
+- Updated the GitHub workflow and pre-commit hook dependencies to the latest versions, enabling users to benefit from improved features and bugfixes in the RTK token saver and Graphify actions, as well as enhanced compatibility and recent improvements in the ai-prepare-commit-msg pre-commit hook. [5459142b](https://github.com/electrocucaracha/gh-workflows/commit/5459142baf98c47e96f454bb56e3e549c334a606)
+
+## [13.1.0] - 2026-11-03
+
+### Added
+
+- Enabled reusable instruction files for GitHub Copilot in the repository, providing centralized best practices for implementation, formatting, error handling, and testing across Go, Python, shell, and Makefile development, with local overrides permitted as needed. [ea3637c5](https://github.com/electrocucaracha/gh-workflows/commit/ea3637c54d4971c38dc34725ec61b380203a41b9)
+
+## [13.0.1] - 2026-11-01
+
+### Changed
+
+- Optimized test code readability by reformulating test logic in test_improvers.rb and test_linter.rb to reduce dense multi-argument calls and improve ongoing maintainability and traceability of test scenarios without altering any test assertions or underlying logic. [c0b9073f](https://github.com/electrocucaracha/gh-workflows/commit/c0b9073f571c67cd15d7190d03c487bdfcc627de)
+
+## [13.0.0] - 2026-11-01
+
+### Removed
+
+- Simplified the linter workflow to preserve failed logs for later repair, eliminating the need for AI analysis and increasing compatibility for forked or external callers. [ad289a7f](https://github.com/electrocucaracha/gh-workflows/commit/ad289a7f444220ca1119e3928c07f4f99f218a06)
+
+## [12.1.3] - 2026-10-30
+
+### Changed
+
+- Updated several dependencies to their latest versions, including setup-uv, setup-rtk, setup-graphify, run-copilot-agent, setup-ollama, and markdownlint-cli, as well as the ai-prepare-commit-msg hook. [3af3b53d](https://github.com/electrocucaracha/gh-workflows/commit/3af3b53d8269d86cf95ca72f052bf1715d798431)
+
+## [12.1.2] - 2026-10-30
+
+### Changed
+
+- Updated several dependencies to newer versions, including setup-uv, setup-rtk, setup-graphify, run-copilot-agent, and ollama, as well as markdownlint-cli and ai-prepare-commit-msg, which is likely to improve stability and security without requiring any breaking changes or migrations. [9cdaf5d8](https://github.com/electrocucaracha/gh-workflows/commit/9cdaf5d8248870a4cc03fe85b0f9a2eb877b737d)
+
+## [12.1.1] - 2026-10-23
+
+### Changed
+
+- Upgraded several GitHub Actions to newer versions, ensuring compatibility with upstream changes and bringing in bugfixes and performance improvements. [8f0fa8c0](https://github.com/electrocucaracha/gh-workflows/commit/8f0fa8c0acf90de07569a66d774498c3101d235f)
+
+## [12.1.0] - 2026-10-16
+
+### Added
+
+- Enabled detailed release notes for versions 9.5.0 through 12.0.1 in CHANGELOG.md, providing improved historical reference and clarifying configuration and workflow updates across multiple releases. [b07705bc](https://github.com/electrocucaracha/gh-workflows/commit/b07705bcdf0c8f3192dc00a07c3913afa37e67cf)
+
 ## [12.0.1] - 2026-10-16
 
 ### Changed
