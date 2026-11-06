@@ -12,7 +12,19 @@ on:
   schedule:
     - cron: "0 0 * * 5"
   workflow_dispatch:
+    inputs:
+      debug:
+        description: Enable shell tracing in the version update script
+        required: false
+        type: boolean
+        default: false
   workflow_call:
+    inputs:
+      debug:
+        description: Enable shell tracing in the version update script
+        required: false
+        type: boolean
+        default: false
     secrets:
       WORKFLOW_TOKEN:
         required: true
@@ -43,6 +55,7 @@ jobs:
         uses: technote-space/create-pr-action@91114507cf92349bec0a9a501c2edf1635427bc5 # v2.1.4
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+          DEBUG: ${{ inputs.debug || false }}
         with:
           EXECUTE_COMMANDS: |
             ./ci/update_versions.sh

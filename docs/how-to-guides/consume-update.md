@@ -41,6 +41,12 @@ name: "Maintenance: Scheduled Dependency Version Updates"
   schedule:
     - cron: "0 0 * * 5"
   workflow_dispatch:
+    inputs:
+      debug:
+        description: Enable shell tracing in the version update script
+        required: false
+        type: boolean
+        default: false
 
 permissions: read-all
 
@@ -50,6 +56,8 @@ jobs:
       contents: write
       pull-requests: write
     uses: electrocucaracha/gh-workflows/.github/workflows/update.yml@main
+    with:
+      debug: ${{ inputs.debug || false }}
     secrets:
       WORKFLOW_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
 ```
@@ -60,6 +68,11 @@ Unlike the improvers workflow,
 this workflow declares `WORKFLOW_TOKEN` as a required secret rather than
 accepting `secrets: inherit`,
 so pass it explicitly.
+
+Set `debug` when manually dispatching this caller workflow
+to enable shell tracing in the update script.
+Keep it disabled unless troubleshooting:
+traced commands appear in the workflow logs.
 
 ## Create the `WORKFLOW_TOKEN` secret
 

@@ -52,6 +52,10 @@ maintainers remain responsible for approving the change.
 
 The default schedule runs every Friday at 00:00 Coordinated Universal Time.
 Maintainers can also invoke the workflow manually.
+Manual and reusable-workflow runs can enable the optional `debug` input
+to trace scripts that honor `DEBUG=true`.
+Traced commands appear in the workflow logs,
+so enable debugging only for trusted runs.
 Concurrency allows one active update run for a Git ref
 and cancels an older overlapping run.
 This prevents multiple scheduled runs from competing to create the same

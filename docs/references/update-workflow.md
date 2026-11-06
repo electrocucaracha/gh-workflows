@@ -18,6 +18,10 @@ nav_order: 3
 | Concurrency              | One active run per Git ref                |
 | Required secret          | `WORKFLOW_TOKEN`                          |
 | Required job permissions | `contents: write`, `pull-requests: write` |
+| Optional input           | `debug` (boolean, defaults to `false`)    |
+
+Scheduled runs do not provide workflow inputs;
+the workflow treats their `debug` value as `false`.
 
 ## Setup performed on the runner
 
@@ -28,6 +32,8 @@ The `check-versions` job:
 1. Runs `technote-space/create-pr-action`,
    which executes `./ci/update_versions.sh` against the checked-out repository, commits any resulting changes,
    and opens a pull request titled **Upgrade versions files** on a `versions-update-<PR_ID>` branch.
+   The `debug` input is passed as `DEBUG` to the action and enables shell tracing
+   in scripts that honor that environment variable.
 
 ## The `ci/update_versions.sh` contract
 
@@ -51,6 +57,10 @@ performs these steps:
 
 Adapt the exceptions, pinned actions,
 and version-file discovery to the consuming repository's own workflow layout.
+The reference script and `gh-updater`'s script both enable shell tracing when
+`DEBUG=true`.
+Tracing can expose command arguments in the workflow logs,
+so enable it only for trusted runs and avoid printing sensitive values.
 
 ## Source links
 
