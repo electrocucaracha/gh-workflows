@@ -76,14 +76,21 @@ diagnostics = JSON.generate({ "jobs" => [
                               { "Exitval" => "0.0", "Stdout" => "SUCCESS_ENTRY_STRING_FLOAT" },
                               { "Exitval" => nil, "Stdout" => "SUCCESS_ENTRY_NULL" },
                               { "Exitval" => 1, "Command" => "yamllint bad.yml",
-                                "Stderr" => "bad.yml:2:3: FAILED_ENTRY" },
-                              { "Exitval" => "2", "Stderr" => "SECOND_FAILURE" }
+                                "Seq" => 1, "JobRuntime" => 0.182,
+                                "Stderr" => "\u001b[31mbad.yml:2:3: FAILED_ENTRY\u001b[0m\n" },
+                              { "Exitval" => "2", "Stdout" => "STDOUT_FAILURE\n",
+                                "Stderr" => "SECOND_FAILURE" },
+                              { "Exitval" => 1, "Stdout" => nil, "Stderr" => "" }
                             ] })
 check_case(script, "failed entries only and label creation", missing_label: true, files: {
              "super-linter-output/nested/results.json" => diagnostics,
              "super-linter-output/all.log" => "RAW_SUCCESS_ENTRY"
            }) do |body, calls|
   raise "Failed entries missing" unless body.include?("FAILED_ENTRY") && body.include?("SECOND_FAILURE")
+  raise "Stdout diagnostics missing" unless body.include?("STDOUT_FAILURE")
+  raise "JSON metadata included" if body.match?(/Exitval|Command|Seq|JobRuntime|yamllint bad.yml/)
+  raise "Terminal escapes included" if body.include?("\u001b") || body.include?('\\u001b')
+  raise "Diagnostic newlines escaped" if body.include?('\\n')
   raise "Successful entries included" if body.include?("SUCCESS_ENTRY")
   raise "Label not created" unless calls.any? { |args| args.first(2) == ["label", "create"] }
 end
@@ -100,6 +107,12 @@ check_case(script, "invalid JSON fallback",
 end
 check_case(script, "missing output") do |body, _calls|
   raise "Missing-log explanation absent" unless body.include?("did not save diagnostic entries")
+end
+check_case(script, "failed entry without diagnostics", files: {
+             "super-linter-output/results.json" => JSON.generate([{ "Exitval" => 1 }])
+           }) do |body, _calls|
+  raise "Missing-log explanation absent" unless body.include?("did not save diagnostic entries")
+  raise "JSON metadata included" if body.include?("Exitval")
 end
 check_case(script, "oversized Unicode logs",
            files: { "super-linter-output/linter.log" => "\u00e9" * 40000 }) do |body, _calls|

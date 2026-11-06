@@ -70,6 +70,7 @@ jobs:
           python3 - <<'PY'
           import json
           import os
+          import re
           from pathlib import Path
           from textwrap import indent
 
@@ -102,8 +103,14 @@ jobs:
                   except json.JSONDecodeError:
                       raw.append((path, text))
                       continue
-                  if entries:
-                      structured.append((path, json.dumps(entries, indent=2, ensure_ascii=False)))
+                  messages = [
+                      re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", entry.get(stream) or "").strip()
+                      for entry in entries
+                      for stream in ("Stdout", "Stderr")
+                  ]
+                  diagnostics = "\n\n".join(message for message in messages if message)
+                  if diagnostics:
+                      structured.append((path, diagnostics))
               elif text.strip():
                   raw.append((path, text))
 
