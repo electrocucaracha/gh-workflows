@@ -232,10 +232,10 @@ jobs:
           fi
       - name: Install RTK token saver
         if: steps.evidence.outputs.run == 'true'
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@5459142baf98c47e96f454bb56e3e549c334a606 # v13.1.1
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@eaf817d527a52410bd6e85ad08a5acbd2039ae3a # v13.3.1
       - name: Generate repository map with Graphify
         if: steps.evidence.outputs.run == 'true'
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@5459142baf98c47e96f454bb56e3e549c334a606 # v13.1.1
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@eaf817d527a52410bd6e85ad08a5acbd2039ae3a # v13.3.1
       - name: Check agent Graphify access
         if: steps.evidence.outputs.run == 'true'
         env:
@@ -384,7 +384,7 @@ jobs:
             exit 1
           fi
       - name: Generate repository map with Graphify
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@5459142baf98c47e96f454bb56e3e549c334a606 # v13.1.1
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@eaf817d527a52410bd6e85ad08a5acbd2039ae3a # v13.3.1
       - name: Select a random reviewer persona
         id: persona
         run: |
