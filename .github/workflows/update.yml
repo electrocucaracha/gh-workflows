@@ -11,13 +11,7 @@ name: "Maintenance: Scheduled Dependency Version Updates"
 on:
   schedule:
     - cron: "0 0 * * 5"
-  workflow_dispatch:
-    inputs:
-      debug:
-        description: Enable shell tracing in the version update script
-        required: false
-        type: boolean
-        default: false
+  workflow_dispatch: {}
   workflow_call:
     inputs:
       debug:
