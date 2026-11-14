@@ -63,7 +63,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
-          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          REF_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           set -euo pipefail
 
@@ -114,24 +115,38 @@ jobs:
               elif text.strip():
                   raw.append((path, text))
 
+          def linter_name(path):
+              match = re.match(r"super-linter-worker-results-(.+)\.json$", path.name)
+              return match.group(1) if match else path.name
+
+
+          logs = [
+              (linter_name(path), text.replace("/github/workspace/", ""))
+              for path, text in (structured or raw)
+          ]
+          sha = os.environ["COMMIT_SHA"]
           sections = [
+              f"<!-- super-linter-commit: {sha} -->",
               f"Workflow run: {os.environ['RUN_URL']}",
-              f"Commit: {os.environ['COMMIT_SHA']}",
+              f"Commit: {sha}",
+              f"Ref: {os.environ['REF_NAME']}",
+              "Failed linters: " + (", ".join(f"`{name}`" for name, _ in logs) or "unknown"),
               "## Failed linter logs",
           ]
-          logs = structured or raw
-          for path, text in logs:
-              sections.append(f"### {path}\n\n{indent(text.rstrip(), '    ')}")
+          # Per-linter budget so one noisy linter cannot hide the others.
+          budget = MAX_LOG_BYTES // max(len(logs), 1)
+          for name, text in logs:
+              encoded = text.rstrip().encode("utf-8")
+              if len(encoded) > budget:
+                  text = encoded[:budget].decode("utf-8", errors="ignore")
+                  text += "\n[truncated; see the workflow run for the full log]"
+              sections.append(f"### {name}\n\n{indent(text.rstrip(), '    ')}")
           if not logs:
               sections.append(
                   "Super-Linter did not save diagnostic entries. "
                   "See the workflow run above for the failed step's logs."
               )
           body = "\n\n".join(sections) + "\n"
-          encoded = body.encode("utf-8")
-          if len(encoded) > MAX_LOG_BYTES:
-              body = encoded[:MAX_LOG_BYTES].decode("utf-8", errors="ignore")
-              body += "\n\nLog entries truncated; see the workflow run above for the full logs.\n"
           report_path = Path(os.environ["RUNNER_TEMP"]) / "linter-issue.md"
           report_path.write_text(body, encoding="utf-8")
           PY
@@ -143,6 +158,13 @@ jobs:
             --json number,title \
             --jq 'map(select(.title == "super-linter GitHub action has failed"))[0].number // empty')
           if [ -n "$issue_number" ]; then
+            # push and pull_request runs on the same commit report identical failures.
+            if gh issue view "$issue_number" --json body,comments \
+              --jq '[.body, .comments[].body] | join("\n")' |
+              grep -qF "super-linter-commit: $COMMIT_SHA"; then
+              echo "Failure for $COMMIT_SHA already reported in #$issue_number"
+              exit 0
+            fi
             gh issue comment "$issue_number" --body-file "$RUNNER_TEMP/linter-issue.md"
           else
             gh issue create --title "super-linter GitHub action has failed" \
