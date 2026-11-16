@@ -29,6 +29,8 @@ on:
     secrets:
       COPILOT_TOKEN:
         required: true
+      COPILOT_TOKEN_EXPIRES_AT:
+        required: true
 permissions:
   contents: read
 concurrency:
@@ -210,7 +212,7 @@ jobs:
       - name: Validate Copilot token expiration
         if: steps.evidence.outputs.run == 'true'
         env:
-          TOKEN_EXPIRES_AT: ${{ vars.COPILOT_TOKEN_EXPIRES_AT }}
+          TOKEN_EXPIRES_AT: ${{ secrets.COPILOT_TOKEN_EXPIRES_AT }}
         run: |
           set -euo pipefail
           if [[ ! "$TOKEN_EXPIRES_AT" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
