@@ -9,6 +9,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.0.0] - 2026-11-16
+
+### Removed
+
+- Eliminated the requirement for specifying the unused COPILOT_TOKEN secret in the linter workflow inputs, allowing existing workflows to remain unchanged. [ca01943b](https://github.com/electrocucaracha/gh-workflows/commit/ca01943b40c57290e2f3ec4179f4abcfb18090c3)
+
+## [13.4.5] - 2026-11-16
+
+### Changed
+
+- Hardened the workflow to securely store sensitive data by retrieving the Copilot token expiration from secrets instead of workflow variables. [4a5d3be7](https://github.com/electrocucaracha/gh-workflows/commit/4a5d3be725e4a540f0c49e61ff7e501dd53c9546)
+
+## [13.4.4] - 2026-11-14
+
+### Changed
+
+- Improved super-linter failure reporting in GitHub workflows by enabling per-linter log budgets, refactoring section headers, and skipping duplicate reports to enhance clarity and usability of failure diagnostics. [569fd7c0](https://github.com/electrocucaracha/gh-workflows/commit/569fd7c08907d5774529175caa0918b29cc73b1d)
+
+## [13.4.3] - 2026-11-13
+
+### Changed
+
+- Updated dependencies to the latest versions, including setup-rtk and setup-graphify to 13.3.1, setup-ollama to 2.1.19, and ai-prepare-commit-msg to 20.14.1, without introducing any breaking changes or requiring migration. [63fef58a](https://github.com/electrocucaracha/gh-workflows/commit/63fef58a62a86f3829684b9f4b3a1a6d35c0d57a)
+
+## [13.4.2] - 2026-11-13
+
+### Changed
+
+- Optimized GitHub Actions and pre-commit hooks by updating several to their latest versions, ensuring improved reliability and consistency across CI and pre-commit environments. [933762bc](https://github.com/electrocucaracha/gh-workflows/commit/933762bc698feac3921950f48995955371825194)
+
+## [13.4.1] - 2026-11-13
+
+### Changed
+
+- Simplified the manual workflow trigger interface by removing the unused debug input from the workflow_dispatch event. [c176944b](https://github.com/electrocucaracha/gh-workflows/commit/c176944b7c14a060634d926e2879ef11d3da71aa)
+
+## [13.4.0] - 2026-11-06
+
+### Added
+
+- Enhanced the project history with detailed release notes covering versions 12.1.1 through 13.3.1, documenting dependency updates, new debugging features, improved test code readability, CODEOWNERS introduction, and workflow simplification. [2f65725d](https://github.com/electrocucaracha/gh-workflows/commit/2f65725d06d38841345d5d5bbc4a0064f221f14d)
+
 ## [13.3.1] - 2026-11-06
 
 ### Fixed
