@@ -20,10 +20,6 @@ on:
         type: string
         required: false
         default: "{}"
-    secrets:
-      COPILOT_TOKEN:
-        description: "Deprecated and unused; accepted for existing callers."
-        required: false
 permissions:
   contents: read
 jobs:
