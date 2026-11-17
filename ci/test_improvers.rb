@@ -84,7 +84,43 @@ review_personas.each do |name|
   raise "#{name}: review persona has web access" if profile.fetch("tools").include?("web/fetch")
 end
 raise "Shared wrapper must disable unrestricted tools" unless wrapper_config.fetch("allow-all-tools") == false
-raise "Shared wrapper must use a tool allowlist" unless wrapper_config.fetch("allowed-tools").include?("shell(rtk git diff)")
+[
+  ["Coding workflow", steps, agent, [
+    "rtk git grep", "rtk git status", "rtk git diff", "rtk git checkout", "rtk git push",
+    "rtk gh pr create", "rtk make test", "rtk make lint"
+  ]],
+  ["Shared wrapper", wrapper.fetch("runs").fetch("steps"), wrapper.fetch("runs").fetch("steps").last, [
+    "rtk git diff", "rtk gh issue list", "rtk gh issue create", "rtk gh issue edit",
+    "rtk gh issue comment", "rtk gh label create", "rtk jq", "rtk find", "rtk grep",
+    "rtk cat", "rtk awk", "rtk sed", "rtk head", "rtk tail"
+  ]]
+].each do |name, command_steps, cli, commands|
+  approvals = command_steps.find { |step| step["name"] == "Configure Copilot command approvals" }
+  raise "#{name}: command approvals must precede Copilot" unless approvals && command_steps.index(approvals) < command_steps.index(cli)
+  raise "#{name}: allowed-tools must not reach upstream shell splitting" if cli.fetch("with").key?("allowed-tools")
+  if name == "Coding workflow"
+    raise "Command approvals and Copilot must only run for eligible tasks" unless [approvals, cli].all? { |step|
+      step.fetch("if") == "steps.evidence.outputs.run == 'true'"
+    }
+  end
+
+  Dir.mktmpdir("copilot-approvals-test") do |dir|
+    home = "#{dir}/home with spaces"
+    workspace = "#{dir}/workspace with spaces"
+    FileUtils.mkdir_p(workspace)
+    env = approvals.fetch("env").merge("HOME" => home, "GITHUB_WORKSPACE" => workspace)
+    output, status = Open3.capture2e(env, "bash", "-e", "-o", "pipefail", "-c", approvals.fetch("run"),
+                                    chdir: workspace)
+    raise "#{name}: command approval setup failed\n#{output}" unless status.success?
+
+    permissions = JSON.parse(File.read("#{home}/.copilot/permissions-config.json"))
+    expected = { "locations" => { workspace => {
+      "tool_approvals" => [{ "kind" => "commands", "commandIdentifiers" => commands }]
+    } } }
+    raise "#{name}: command approvals changed or escaped workspace scope" unless permissions == expected
+  end
+  puts "PASS #{name} workspace-scoped command approvals"
+end
 raise "Shared wrapper must restrict paths and URLs" unless wrapper_config.fetch("allow-all-paths") == false && wrapper_config.fetch("allow-all-urls") == false
 raise "Shared wrapper URL allowlist missing" unless wrapper_config.fetch("allowed-urls") == "api.github.com,github.com"
 

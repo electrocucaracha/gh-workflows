@@ -249,6 +249,16 @@ jobs:
             echo "::error::Refresh .github/agents/${AGENT}.agent.md: its tools allowlist must include \"graphify/*\"."
             exit 1
           fi
+      - name: Configure Copilot command approvals
+        if: steps.evidence.outputs.run == 'true'
+        env:
+          ALLOWED_COMMANDS: '["rtk git grep", "rtk git status", "rtk git diff", "rtk git checkout", "rtk git push", "rtk gh pr create", "rtk make test", "rtk make lint"]'
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.copilot"
+          jq -n --arg workspace "$GITHUB_WORKSPACE" --argjson commands "$ALLOWED_COMMANDS" \
+            '{locations: {($workspace): {tool_approvals: [{kind: "commands", commandIdentifiers: $commands}]}}}' \
+            > "$HOME/.copilot/permissions-config.json"
       - name: Run Copilot CLI improvement agent
         id: copilot
         if: steps.evidence.outputs.run == 'true'
@@ -277,7 +287,6 @@ jobs:
               }
             }
           allow-all-tools: false
-          allowed-tools: "shell(rtk git grep),shell(rtk git status),shell(rtk git diff),shell(rtk git checkout),shell(rtk git push),shell(rtk gh pr create),shell(rtk make test),shell(rtk make lint)"
           available-tools: "read,search,edit,execute,graphify/*,todo"
           allowed-urls: "api.github.com,github.com"
           allow-all-paths: false

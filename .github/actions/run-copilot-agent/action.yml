@@ -39,6 +39,16 @@ runs:
           echo "::error::Refresh .github/agents/${AGENT}.agent.md: its tools allowlist must include \"graphify/*\"."
           exit 1
         fi
+    - name: Configure Copilot command approvals
+      shell: bash
+      env:
+        ALLOWED_COMMANDS: '["rtk git diff", "rtk gh issue list", "rtk gh issue create", "rtk gh issue edit", "rtk gh issue comment", "rtk gh label create", "rtk jq", "rtk find", "rtk grep", "rtk cat", "rtk awk", "rtk sed", "rtk head", "rtk tail"]'
+      run: |
+        set -euo pipefail
+        mkdir -p "$HOME/.copilot"
+        jq -n --arg workspace "$GITHUB_WORKSPACE" --argjson commands "$ALLOWED_COMMANDS" \
+          '{locations: {($workspace): {tool_approvals: [{kind: "commands", commandIdentifiers: $commands}]}}}' \
+          > "$HOME/.copilot/permissions-config.json"
     - name: Run Copilot CLI agent
       uses: austenstone/copilot-cli@5a9fbe56fd6cdb5e50d329fd87c751748cf5182f # v4.0
       env:
@@ -49,7 +59,6 @@ runs:
         copilot-token: ${{ inputs.copilot-token }}
         repo-token: ${{ inputs.github-token }}
         allow-all-tools: false
-        allowed-tools: "shell(rtk git diff),shell(rtk gh issue list),shell(rtk gh issue create),shell(rtk gh issue edit),shell(rtk gh issue comment),shell(rtk gh label create),shell(rtk jq),shell(rtk find),shell(rtk grep),shell(rtk cat),shell(rtk awk),shell(rtk sed),shell(rtk head),shell(rtk tail)"
         available-tools: "read,search,edit,execute,github/*,graphify/*,todo"
         allow-all-paths: false
         allow-all-urls: false
