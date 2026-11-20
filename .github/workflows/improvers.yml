@@ -123,7 +123,7 @@ jobs:
           persist-credentials: false
       - name: Set up Go for coverage
         if: matrix.id == 'improve-code-coverage' && hashFiles('go.mod') != ''
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: go.mod
           cache: false
@@ -234,10 +234,10 @@ jobs:
           fi
       - name: Install RTK token saver
         if: steps.evidence.outputs.run == 'true'
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@eaf817d527a52410bd6e85ad08a5acbd2039ae3a # v13.3.1
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-rtk@71e4e96b50b203c2b8e7d680859c5c3136d8acc3 # v14.1.1
       - name: Generate repository map with Graphify
         if: steps.evidence.outputs.run == 'true'
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@eaf817d527a52410bd6e85ad08a5acbd2039ae3a # v13.3.1
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@71e4e96b50b203c2b8e7d680859c5c3136d8acc3 # v14.1.1
       - name: Check agent Graphify access
         if: steps.evidence.outputs.run == 'true'
         env:
@@ -395,7 +395,7 @@ jobs:
             exit 1
           fi
       - name: Generate repository map with Graphify
-        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@eaf817d527a52410bd6e85ad08a5acbd2039ae3a # v13.3.1
+        uses: electrocucaracha/gh-workflows/.github/actions/setup-graphify@71e4e96b50b203c2b8e7d680859c5c3136d8acc3 # v14.1.1
       - name: Select a random reviewer persona
         id: persona
         run: |
