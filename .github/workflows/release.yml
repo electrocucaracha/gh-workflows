@@ -33,11 +33,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
           enable-cache: false
       - name: Set up Ollama
-        uses: ai-action/setup-ollama@4d24ba3341d7b8e6ed2f80aa4ee53be6ee8e29fc # v2.1.19
+        uses: ai-action/setup-ollama@9865531c375e54c1dd1dd467c207c0ae3e98ab77 # v2.1.21
       - name: Generate changelog
         run: |
           uvx --from git+https://github.com/electrocucaracha/ai-changelog.git@61613b655dd1fc60693f1f6002bad8e1bad9cc99 ai-changelog --create-semver-tags .

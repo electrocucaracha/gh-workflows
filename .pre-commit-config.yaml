@@ -46,7 +46,7 @@ repos:
       # Run via npx: newer npm rejects pre-commit's git+file install of node hooks (EALLOWGIT).
       - id: markdownlint
         name: markdownlint
-        entry: npx --yes markdownlint-cli@0.50.0
+        entry: npx --yes markdownlint-cli@0.50.1
         language: system
         files: \.(md|mdown|markdown)$
       - id: prettier-check
@@ -60,7 +60,7 @@ repos:
         language: system
         pass_filenames: false
   - repo: https://github.com/electrocucaracha/ai-prepare-commit-msg
-    rev: v20.15.1
+    rev: v20.16.2
     hooks:
       - id: ai-prepare-commit
         stages:
